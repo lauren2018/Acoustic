@@ -4,16 +4,15 @@ import android.annotation.TargetApi;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ListView;
 
 import parsley.acoustic.fragment.ModuleListFragment;
@@ -21,7 +20,7 @@ import parsley.acoustic.fragment.ModuleListFragment;
 import static android.media.AudioTrack.MODE_STREAM;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity_mem extends AppCompatActivity {
     private Button key ;
     private Boolean isOn = false;
     //tx and rx
@@ -42,7 +41,6 @@ public class MainActivity extends AppCompatActivity {
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_nav);
         mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item,mNavSelections));
-        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
         //set the list's click listener
         //mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
         //InputStream inputStream = getResources().openRawResource(R.raw.data);
@@ -120,19 +118,10 @@ public class MainActivity extends AppCompatActivity {
         Fragment fragment = new ModuleListFragment();
         Bundle args = new Bundle();
         args.putInt(ModuleListFragment.VIEW_NAME,position);
-        fragment.setArguments(args);
         //Insert the fragment by placing any existing fragment
-        FragmentManager fragmentManager = getSupportFragmentManager();
-
-        FrameLayout currentLayout = (FrameLayout) findViewById(R.id.content_frame);
-        currentLayout.removeAllViews();
-        fragmentManager.beginTransaction()
-                .replace(R.id.content_frame,fragment)
-                .commit();
-        mDrawerList.setItemChecked(position, true);
-        //setTitle(mNavSelections[position]);
-        mDrawerLayout.closeDrawer(mDrawerList);
+        //FragmentManager fragmentManager = getFragmentManager();
     }
+
 
 
 }
