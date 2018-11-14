@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Acoustic</string>
+    <string-array name="nav_selections">
+        <item>Modules</item>
+        <item>View</item>
+        <item>Run</item>
+        <item>Stop</item>
+    </string-array>
 </resources>
