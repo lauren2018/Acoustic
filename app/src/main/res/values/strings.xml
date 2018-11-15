@@ -6,4 +6,23 @@
         <item>Run</item>
         <item>Stop</item>
     </string-array>
+    <string-array name="sda_modulation">
+        <item>chirp</item>
+        <item>fsk</item>
+        <item>psk</item>
+        <item>qam</item>
+        <item>ofdm</item>
+    </string-array>
+    <string-array name="sda_coding">
+        <item>turbo</item>
+        <item>dsss</item>
+    </string-array>
+    <string-array name="class_name">
+        <item>sda_modulation</item>
+        <item>sda_coding</item>
+    </string-array>
+    <string-array name="gridview_module_class_id">
+        <item>module_class_modulation</item>
+        <item>module_class_coding</item>
+    </string-array>
 </resources>

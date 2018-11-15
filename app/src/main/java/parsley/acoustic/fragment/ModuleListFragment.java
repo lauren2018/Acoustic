@@ -16,6 +16,7 @@ public class ModuleListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState){
         //mGridView = (GridView) findViewById(R.id.);
-        return inflater.inflate(R.layout.test, container, false);
+        View v = inflater.inflate(R.layout.module_list, container, false);
+        return v;
     }
 }

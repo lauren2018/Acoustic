@@ -1,19 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<LinearLayout
     xmlns:android = "http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:id="@+id/module_list"
+    android:divider="@android:color/holo_red_light"
+    android:dividerHeight = "400dp"
+    android:showDividers="middle"
+    >
+    <!--<Button-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_gravity="center_horizontal"-->
+        <!--android:text="Start/stop Rx"-->
+        <!--android:id="@+id/key"-->
+        <!--/>-->
+    <!--<Button-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_gravity="center_horizontal"-->
+        <!--android:text="Start/stop Rx"-->
+        <!--android:id="@+id/key2"-->
+        <!--/>-->
     <GridView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/module_list"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:id="@+id/module_class_modulation"
         android:numColumns="auto_fit"
         android:columnWidth="90dp"
         android:verticalSpacing="10dp"
         android:stretchMode="columnWidth"
         android:gravity="center"
-    >
-        hhh
-    </GridView>
+        />
 
-</FrameLayout>
+    <GridView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:id="@+id/module_class_coding"
+        android:numColumns="auto_fit"
+        android:columnWidth="90dp"
+        android:verticalSpacing="10dp"
+        android:stretchMode="columnWidth"
+        android:gravity="center" />
+</LinearLayout>
