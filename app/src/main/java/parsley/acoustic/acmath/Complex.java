@@ -78,4 +78,11 @@ public class Complex{
         double newImag = -this.imag;
         return new Complex(newReal, newImag);
     }
+
+    public  Complex parseComplex(String s){
+        String [] str = s.split("[\\+-ij]",2);
+        real = Float.parseFloat(str[0]);
+        imag = Float.parseFloat(str[1]);
+        return this;
+    }
 }

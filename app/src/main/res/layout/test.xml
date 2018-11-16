@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
-    <LinearLayout
+    <ListView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:gravity="center_horizontal">
@@ -22,7 +22,7 @@
             android:text="Test Button"
             android:id="@+id/key2"
             />
-    </LinearLayout>
+    </ListView>
 
 
 </android.support.constraint.ConstraintLayout>
