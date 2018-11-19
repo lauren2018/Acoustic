@@ -5,6 +5,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -27,7 +28,7 @@ import parsley.acoustic.view.basic.Param;
  * Created by tomsp on 2017/12/25.
  */
 
-public class BlockView extends RelativeLayout{
+public class BlockView extends LinearLayout{
     /*variables on layout*/
     private BlockTemplate mBlock;
     /*variables on logic, params*/
@@ -41,31 +42,42 @@ public class BlockView extends RelativeLayout{
 
     /*variables on logic, connection*/
     private LinearLayout textGroup;
+    private RelativeLayout mBlockLayout;
 
     public BlockView(Context context, Integer id){
         super(context);
+        _initViews();
         //this.mBlockViewId = id;
     }
 
     public BlockView(Context context, AttributeSet attr, Integer id){
         super(context,attr);
+        _initViews();
         //this.mBlockViewId = id;
     }
 
     public BlockView(Context context,  ArrayList<String> keys, Map<String, Param> params, Integer id){
         super(context);
-        //this.mBlockViewId = id;
+        for(int i = 0; i < keys.size();i++){
+            mParameterKeys.add(keys.get(i));
+            mParameters.put(keys.get(i),params.get(keys.get(i)));
+        }
         setParams(context);
+        _initViews();
+        //this.mBlockViewId = id;
     }
 
     public BlockView(Context context, AttributeSet attrs,  ArrayList<String> keys, Map<String, Param> params, Integer id){
         super(context, attrs);
+        _initViews();
         //this.mBlockViewId = id;
         setParams(context);
     }
 
     protected void setParams(Context context){
         mBlock = new BlockTemplate(context,mParameterKeys,mParameters,mInPortsNum,mOutPortsNum);
+        mBlockLayout = new RelativeLayout(context);
+
         //mBlock.setId(R.id.block);
 //        in = new LinearLayout(context);
 //        block = new RelativeLayout(context);
@@ -83,20 +95,46 @@ public class BlockView extends RelativeLayout{
 
     protected void _initViews(){
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(R.layout.module_board,this);
+        //inflater.inflate(R.layout.module_board,this,false);
         //add a basic block
-        LinearLayout moduleboard_lo = (LinearLayout) findViewById(R.id.module_board);
+       // LinearLayout moduleBoard_lo = (LinearLayout) findViewById(R.id.module_board);
+
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        lp.addRule(RelativeLayout.ALIGN_TOP,mBlock.getId());
+
+
+        //add Text Part (Text part includes textview_lo and edittext_lo, these two children have their own views respectively)
+        /* set the view attributes */
+        LinearLayout textPart = new LinearLayout(getContext());
+        textPart.setOrientation(HORIZONTAL);
         LinearLayout textview_lo = new LinearLayout(getContext());
         LinearLayout edittext_lo = new LinearLayout(getContext());
-        //....
-        LayoutParams textviewParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        textview_lo.setOrientation(VERTICAL);
+        edittext_lo.setOrientation(VERTICAL);
+        LayoutParams textviewParams = new LayoutParams(0, LayoutParams.WRAP_CONTENT);
+        LayoutParams edittextParams = new LayoutParams(0, LayoutParams.WRAP_CONTENT);
+        textview_lo.setGravity(1);
+        edittext_lo.setGravity(3);
+        textview_lo.setLayoutParams(textviewParams);
+        edittext_lo.setLayoutParams(edittextParams);
+        /*finish setting*/
+
+        textPart.addView(textview_lo);
+        textPart.addView(edittext_lo);
         for(int i = 0; i < mParameters.size();i++){
             TextView tv = new TextView(getContext());
             EditText et = new EditText(getContext());
-            //.....
+            /******/
+            tv.setText("Hello"+Integer.toString(i));
             textview_lo.addView(tv);
             edittext_lo.addView(et);
         }
+        this.addView(mBlock);
+        this.addView(textPart);
+//        try{
+//
+//        }
+//        moduleBoard_lo.addView(this);
 
 
 //        llayout.addView(in);
@@ -142,19 +180,19 @@ public class BlockView extends RelativeLayout{
 //            tmp.setLayoutParams(layoutParams);
 //        }
         //add the text
-        for(int i = 0; i < mParameters.size();i++){
-            String key = mParameterKeys.get(i);
-            Param p = mParameters.get(key);
-            String value = p.toString();
-            TextView tv = new TextView(getContext());
-            tv.setTextSize(10);
-            tv.setText(key + ": " + value);
-            mTexts.put(key,tv);
-            textGroup.addView(tv);
-        }
-        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT);
-        lp.addRule(RelativeLayout.ALIGN_TOP,mBlock.getId());
-        textGroup.setLayoutParams(lp);
+//        for(int i = 0; i < mParameters.size();i++){
+//            String key = mParameterKeys.get(i);
+//            Param p = mParameters.get(key);
+//            String value = p.toString();
+//            TextView tv = new TextView(getContext());
+//            tv.setTextSize(10);
+//            tv.setText(key + ": " + value);
+//            mTexts.put(key,tv);
+//            textGroup.addView(tv);
+//        }
+//        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT);
+//        lp.addRule(RelativeLayout.ALIGN_TOP,mBlock.getId());
+//        textGroup.setLayoutParams(lp);
         //block.addView(textGroup);
     }
 
