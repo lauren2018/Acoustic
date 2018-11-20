@@ -7,7 +7,7 @@
         <item>Stop</item>
     </string-array>
     <string-array name="sda_modulation">
-        <item>chirp</item>
+        <item>chirpView</item>
         <item>fsk</item>
         <item>psk</item>
         <item>qam</item>

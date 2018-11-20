@@ -1,9 +1,13 @@
 package parsley.acoustic.view.blocks;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -13,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.w3c.dom.Attr;
+import org.xmlpull.v1.XmlPullParser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,7 +33,7 @@ import parsley.acoustic.view.basic.Param;
  * Created by tomsp on 2017/12/25.
  */
 
-public class BlockView extends LinearLayout{
+public class BlockView extends RelativeLayout{
     /*variables on layout*/
     private BlockTemplate mBlock;
     /*variables on logic, params*/
@@ -43,6 +48,9 @@ public class BlockView extends LinearLayout{
     /*variables on logic, connection*/
     private LinearLayout textGroup;
     private RelativeLayout mBlockLayout;
+
+    /**parameters of drag/touch*/
+    float dX, dY, lastAction;
 
     public BlockView(Context context, Integer id){
         super(context);
@@ -77,123 +85,19 @@ public class BlockView extends LinearLayout{
     protected void setParams(Context context){
         mBlock = new BlockTemplate(context,mParameterKeys,mParameters,mInPortsNum,mOutPortsNum);
         mBlockLayout = new RelativeLayout(context);
-
-        //mBlock.setId(R.id.block);
-//        in = new LinearLayout(context);
-//        block = new RelativeLayout(context);
-//        out = new LinearLayout(context);
-//        textGroup = new LinearLayout(context);
-
-//
-//        for(int i = 0; i < mInPortsNum; i++){
-//            mInPorts.add(new InPort(context,this));
-//        }
-//        for(int i = 0; i < mOutPortsNum; i++){
-//            mOutPorts.add(new OutPort(context,this));
-//        }
     }
 
     protected void _initViews(){
-        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        //inflater.inflate(R.layout.module_board,this,false);
-        //add a basic block
-       // LinearLayout moduleBoard_lo = (LinearLayout) findViewById(R.id.module_board);
-
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        LinearLayout blockParams = createBlockParamsView();
         lp.addRule(RelativeLayout.ALIGN_TOP,mBlock.getId());
-
-
-        //add Text Part (Text part includes textview_lo and edittext_lo, these two children have their own views respectively)
-        /* set the view attributes */
-        LinearLayout textPart = new LinearLayout(getContext());
-        textPart.setOrientation(HORIZONTAL);
-        LinearLayout textview_lo = new LinearLayout(getContext());
-        LinearLayout edittext_lo = new LinearLayout(getContext());
-        textview_lo.setOrientation(VERTICAL);
-        edittext_lo.setOrientation(VERTICAL);
-        LayoutParams textviewParams = new LayoutParams(0, LayoutParams.WRAP_CONTENT);
-        LayoutParams edittextParams = new LayoutParams(0, LayoutParams.WRAP_CONTENT);
-        textview_lo.setGravity(1);
-        edittext_lo.setGravity(3);
-        textview_lo.setLayoutParams(textviewParams);
-        edittext_lo.setLayoutParams(edittextParams);
-        /*finish setting*/
-
-        textPart.addView(textview_lo);
-        textPart.addView(edittext_lo);
-        for(int i = 0; i < mParameters.size();i++){
-            TextView tv = new TextView(getContext());
-            EditText et = new EditText(getContext());
-            /******/
-            tv.setText("Hello"+Integer.toString(i));
-            textview_lo.addView(tv);
-            edittext_lo.addView(et);
-        }
+        lp.setMargins(20,20,10,0);
+        blockParams.setLayoutParams(lp);
+        //lp.addRule(RelativeLayout.ALIGN_TOP,blockParams.getId());
+        //this.setLayoutParams(lp);
         this.addView(mBlock);
-        this.addView(textPart);
-//        try{
-//
-//        }
-//        moduleBoard_lo.addView(this);
+        this.addView(blockParams);
 
-
-//        llayout.addView(in);
-//        llayout.addView(block);
-//        llayout.addView(out);
-//        in.setOrientation(LinearLayout.VERTICAL);
-//        out.setOrientation(LinearLayout.VERTICAL);
-//        textGroup.setOrientation(LinearLayout.VERTICAL);
-//        in.layout(0,0,0,10);
-//        out.setPadding(0,0,0,10);
-//        //add the block
-//        block.addView(mBlock);
-        //add the in ports
-//        for(int i = 0; i < mInPortsNum; i++){
-//            InPort tmp = mInPorts.get(i);
-//            in.addView(tmp);
-//            tmp.setOnClickListener(new OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    //inport connection
-//                    Toast.makeText(getContext(),"You Click InPort!",Toast.LENGTH_SHORT).show();
-//                }
-//            });
-//            MarginLayoutParams marginParams = new MarginLayoutParams(tmp.getLayoutParams());
-//            marginParams.setMargins(0,0,0,10);
-//            LayoutParams layoutParams = new LayoutParams(marginParams);
-//            tmp.setLayoutParams(layoutParams);
-//        }
-        //add the outports
-//        for(int i = 0; i < mOutPortsNum; i++){
-//            OutPort tmp = mOutPorts.get(i);
-//            out.addView(tmp);
-//            tmp.setOnClickListener(new OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    //outport connection
-//                    Toast.makeText(getContext(),"You Click OutPort!",Toast.LENGTH_SHORT).show();
-//                }
-//            });
-//            MarginLayoutParams marginParams = new MarginLayoutParams(tmp.getLayoutParams());
-//            marginParams.setMargins(0,0,0,10);
-//            LayoutParams layoutParams = new LayoutParams(marginParams);
-//            tmp.setLayoutParams(layoutParams);
-//        }
-        //add the text
-//        for(int i = 0; i < mParameters.size();i++){
-//            String key = mParameterKeys.get(i);
-//            Param p = mParameters.get(key);
-//            String value = p.toString();
-//            TextView tv = new TextView(getContext());
-//            tv.setTextSize(10);
-//            tv.setText(key + ": " + value);
-//            mTexts.put(key,tv);
-//            textGroup.addView(tv);
-//        }
-//        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT);
-//        lp.addRule(RelativeLayout.ALIGN_TOP,mBlock.getId());
-//        textGroup.setLayoutParams(lp);
-        //block.addView(textGroup);
     }
 
     public void updateParams(ArrayList<String> keys, Map<String,Param> params){
@@ -208,6 +112,69 @@ public class BlockView extends LinearLayout{
 //    public Integer getBlockViewId(){
 //        return this.mBlockViewId;
 //    }
+
+    @TargetApi(23)
+    private TextView createTagTextView(String s){
+        TextView tag = new TextView(getContext());
+        tag.setText(s);
+        tag.setTextAppearance(R.style.TagTextView);
+        tag.setSingleLine(true);
+        tag.setEllipsize(TextUtils.TruncateAt.valueOf("END"));
+//        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+//                LinearLayout.LayoutParams.WRAP_CONTENT);
+//        lp.weight = 1;
+//        tag.setLayoutParams(lp);
+        tag.setWidth((int)(mBlock.getBlockWidth()*1.0/4));
+
+        //...
+        return tag;
+    }
+
+    @TargetApi(23)
+    private TextView createValueTextView(String s){
+        TextView value = new TextView(getContext());
+        value.setText(s);
+        value.setTextAppearance(R.style.ValueTextView);
+        value.setSingleLine(true);
+        value.setEllipsize(TextUtils.TruncateAt.valueOf("END"));
+        value.setWidth((int)(mBlock.getBlockWidth()*3.0/4));
+//        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+//                LinearLayout.LayoutParams.WRAP_CONTENT);
+//        lp.weight = 3;
+        //value.setLayoutParams(lp);
+        //value.setEms(10);
+
+        return value;
+    }
+
+    //create the linear layout for each row in the block parameters
+    private LinearLayout createBlockRowView(String key, String value){
+        LinearLayout rowParams = new LinearLayout(getContext());
+        rowParams.setOrientation(LinearLayout.HORIZONTAL);
+        LinearLayout.LayoutParams params = getWrapContentParams();
+        rowParams.setLayoutParams(params);
+        rowParams.addView(createTagTextView(key));
+        rowParams.addView(createValueTextView(value));
+        return rowParams;
+    }
+
+    private LinearLayout createBlockParamsView(){
+        LinearLayout blockParams = new LinearLayout(getContext());
+        LinearLayout.LayoutParams params = getWrapContentParams();
+        blockParams.setOrientation(LinearLayout.VERTICAL);
+        blockParams.setLayoutParams(params);
+        for(int i = 0; i < mParameterKeys.size();i++){
+            String key = mParameterKeys.get(i);
+            String value = mParameters.get(key).toString();
+            blockParams.addView(createBlockRowView(key,value));
+        }
+        return blockParams;
+    }
+
+    private LinearLayout.LayoutParams getWrapContentParams(){
+        return new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+    }
 
 
     public ArrayList<String> getParameterKeys(){
@@ -225,5 +192,73 @@ public class BlockView extends LinearLayout{
     public ArrayList<OutPort> getOutPorts(){
         return this.mOutPorts;
     }
+
+//    @Override
+//    public boolean onTouchEvent(MotionEvent event){
+////        view = (BlockView) view;
+//        long mTimerBegin = System.currentTimeMillis();
+//        long mTimerEnd = System.currentTimeMillis();
+//        boolean down = false;
+//        switch (event.getActionMasked()) {
+//            case MotionEvent.ACTION_DOWN:
+//                dX = event.getX() - event.getRawX();
+//                dY = event.getY() - event.getRawY();
+//                lastAction = MotionEvent.ACTION_DOWN;
+//                if(!down) {
+//                    mTimerBegin = System.currentTimeMillis();
+//                    down = true;
+//                }
+//                break;
+//
+//            case MotionEvent.ACTION_MOVE:
+//                //delete the original cables
+////                for(int i = 0; i < ((BlockView) event).getInPorts().size();i++){
+////                    InPort tmp = ((BlockView) view).getInPorts().get(i);
+////                    if(tmp.isConnected()){
+////                        //view_disconnect_connect(tmp,tmp.getConnectedPort(),true);
+////                    }
+////                }
+////                for(int i = 0; i < ((BlockView) view).getOutPorts().size();i++){
+////                    OutPort tmpo = ((BlockView) view).getOutPorts().get(i);
+////                    for(int j = 0; j < tmpo.getConnectedPorts().size();j++){
+////                        InPort tmpi = tmpo.getConnectedPorts().get(j);
+////                        //view_disconnect_connect(tmpi,tmpo,true);
+////                    }
+////                }
+//                event.setY(event.getRawY() + dY);
+//                view.setX(event.getRawX() + dX);
+//                //add the new cables
+//                for(int i = 0; i < ((BlockView) view).getInPorts().size();i++){
+//                    InPort tmp = ((BlockView) view).getInPorts().get(i);
+//                    if(tmp.isConnected()){
+//                        //view_connect(tmp,tmp.getConnectedPort(),true);
+//                    }
+//                }
+//                for(int i = 0; i < ((BlockView) view).getOutPorts().size();i++){
+//                    OutPort tmpo = ((BlockView) view).getOutPorts().get(i);
+//                    for(int j = 0; j < tmpo.getConnectedPorts().size();j++){
+//                        InPort tmpi = tmpo.getConnectedPorts().get(j);
+//                        //view_connect(tmpi,tmpo,true);
+//                    }
+//                }
+//                lastAction = MotionEvent.ACTION_MOVE;
+//
+//                break;
+//
+//            case MotionEvent.ACTION_UP:
+//                //click event
+//                mTimerEnd = System.currentTimeMillis();
+//                if (lastAction == MotionEvent.ACTION_DOWN ){
+//                    //_initPopupWindow((BlockView)view);
+//                    return false;
+//                } else{
+//                    return true;
+//                }
+//
+//            default:
+//                return false;
+//        }
+//        return true;
+//    }
 
 }

@@ -1,19 +1,26 @@
-package parsley.acoustic.activity;
+package parsley.acoustic.view.blocks;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Point;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import parsley.acoustic.view.blocks.BlockView;
-import parsley.acoustic.view.DragBoardView;
+import parsley.acoustic.view.blocks.DragBoardView;
 import parsley.acoustic.view.InPort;
 import parsley.acoustic.view.OutPort;
 import parsley.acoustic.view.PopupWindowView;
@@ -29,8 +36,6 @@ public class DragBoardLayout extends RelativeLayout implements View.OnTouchListe
 
     private Integer id = 0;
     private Map<Integer,BlockView> moduleList = new HashMap<Integer, BlockView>();
-    private LinearLayout parentLayout;
-    private DragBoardView mBoardView;
 
     private OnTouchListener mCableTouchListener;
     private ArrayList<ArrayList<InPort>> inPortList = new ArrayList<ArrayList<InPort>>();
@@ -40,22 +45,31 @@ public class DragBoardLayout extends RelativeLayout implements View.OnTouchListe
     private OutPort focusOutPort;
     private boolean outPortSelected = false;
 
-    public DragBoardLayout(Context context, LinearLayout l){
+    //cable drawing params
+    private Paint mCablePaint;
+    private Paint mCanvasPaint;
+    private Bitmap mBitmap;
+    private Canvas mBitmapCanvas;
+
+    public DragBoardLayout(Context context){
         super(context);
-        _init(l);
+//        _init();
+//        init_cableDrawingParams();
     }
 
-    public DragBoardLayout(Context context, AttributeSet attrs, LinearLayout l){
+    public DragBoardLayout(Context context, AttributeSet attrs){
         super(context,attrs);
-        _init(l);
+//        _init();
+//        init_cableDrawingParams();
     }
 
-    private void _init(LinearLayout l) {
-        parentLayout = l;
-        int width = getScreenWidth();
-        int height = getScreenHeight();
-        mBoardView = new DragBoardView(getContext(),width,height);
-        this.addView(mBoardView);
+    public void initListener() {
+        TextView t = new TextView(getContext());
+        t.setText("DragBoard Layout!\n");
+//        int width = getScreenWidth();
+//        int height = getScreenHeight();
+        //mBoardView = new DragBoardView(getContext(),width,height);
+        //this.addView(mBoardView);
         mCableTouchListener = new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -234,7 +248,7 @@ addModule() add the new modules to the module list dragging board. Note that it 
             int start_y =  (int)getRelativeTop(inPort)+inPort.getHeight()/2;
             int end_x = (int)getRelativeLeft(outPort)+outPort.getWidth()/2;
             int end_y =(int)getRelativeTop(outPort)+outPort.getHeight()/2;
-            mBoardView.drawCables(start_x,start_y,end_x,end_y);
+            drawCables(start_x,start_y,end_x,end_y);
             if(!reserved) {
                 inPort.setConnected(outPort);
                 outPort.setConnected(inPort);
@@ -256,7 +270,7 @@ addModule() add the new modules to the module list dragging board. Note that it 
             int start_y =  (int)getRelativeTop(inPort)+inPort.getHeight()/2;
             int end_x = (int)getRelativeLeft(outPort)+outPort.getWidth()/2;
             int end_y =(int)getRelativeTop(outPort)+outPort.getHeight()/2;
-            mBoardView.deleteCables(start_x,start_y,end_x,end_y);
+            deleteCables(start_x,start_y,end_x,end_y);
             if(!reserved){
                 inPort.dismissConnected();
                 outPort.dismissConnected(inPort);
@@ -266,6 +280,7 @@ addModule() add the new modules to the module list dragging board. Note that it 
             //this.addView(line);
         }
     }
+
 
     private int getRelativeLeft(View v){
         float left = v.getX();
@@ -290,4 +305,65 @@ addModule() add the new modules to the module list dragging board. Note that it 
         }
         return (int)top;
     }
-}
+
+
+    @Override
+    protected void onDraw(Canvas canvas){
+        if(mBitmap != null){
+            canvas.drawBitmap(mBitmap,0,0,mCablePaint);
+        }
+    }
+
+    public void draw(int s_x, int s_y, int e_x, int e_y){
+        int an_y = (e_y+s_y)/2;
+        int  an_x = (e_x+s_x)/2;
+        Point start, anchor1, anchor2, end;
+        if(s_x > e_x){
+            start = new Point(s_x,s_y);
+            anchor1 = new Point(s_x, an_y);
+            anchor2 = new Point(e_x, an_y);
+            end = new Point(e_x,e_y);
+        }
+        else{
+            start = new Point(s_x,s_y);
+            anchor1 = new Point(an_x, s_y);
+            anchor2 = new Point(an_x, e_y);
+            end = new Point(e_x,e_y);
+        }
+        mBitmapCanvas.drawLine(start.x,start.y,anchor1.x,anchor1.y,mCablePaint);
+        mBitmapCanvas.drawLine(anchor1.x,anchor1.y,anchor2.x,anchor2.y,mCablePaint);
+        mBitmapCanvas.drawLine(anchor2.x,anchor2.y,end.x,end.y,mCablePaint);
+        invalidate();
+    }
+
+    public void drawCables(int s_x, int s_y, int e_x, int e_y){
+        mCablePaint.setColor(Color.RED);
+        draw(s_x,s_y,e_x,e_y);
+    }
+
+    public void deleteCables(int s_x, int s_y, int e_x, int e_y){
+        mCablePaint.setColor(Color.GRAY);
+        draw(s_x,s_y,e_x,e_y);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec,int heightMeasureSpec){
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
+    }
+
+    @Override
+    public void setLayoutParams(ViewGroup.LayoutParams params){
+        super.setLayoutParams(params);
+
+    }
+
+    public void initCanvas(int width, int height){
+            mBitmap = Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);
+            mBitmapCanvas = new Canvas(mBitmap);
+            mBitmapCanvas.drawColor(Color.GRAY);
+            mCablePaint = new Paint();
+            mCablePaint.setColor(Color.RED);
+            mCablePaint.setStrokeWidth(6);
+        }
+    }

@@ -6,11 +6,22 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import parsley.acoustic.view.basic.Param;
+import parsley.acoustic.view.blocks.BlockView;
 
-public class chirp {
+public class chirpView extends BlockView {
     static float [] y;
     static float phase;
 
+
+    public chirpView(Context context, ArrayList<String> keys, Map<String, Param> params, Integer id){
+        super(context,keys,params,id);
+//        _initViews();
+//        //this.mBlockViewId = id;
+//        setParams(context);
+    }
+//    public chirp (){
+//
+//    }
 
     public static float[] get_chirp(float [] t,float f0, float t1, float f1, float initPhase ){
         float [] f = new float[t.length];

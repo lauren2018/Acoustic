@@ -6,23 +6,9 @@
     android:orientation="vertical"
     android:id="@+id/module_list"
     android:divider="@android:color/holo_red_light"
-    android:dividerHeight = "400dp"
+    android:dividerHeight = "40dp"
     android:showDividers="middle"
     >
-    <!--<Button-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_gravity="center_horizontal"-->
-        <!--android:text="Start/stop Rx"-->
-        <!--android:id="@+id/key"-->
-        <!--/>-->
-    <!--<Button-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_gravity="center_horizontal"-->
-        <!--android:text="Start/stop Rx"-->
-        <!--android:id="@+id/key2"-->
-        <!--/>-->
     <GridView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -45,4 +31,20 @@
         android:verticalSpacing="10dp"
         android:stretchMode="columnWidth"
         android:gravity="center" />
+
+    <!--<Button-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_gravity="center_horizontal"-->
+        <!--android:text="Start/stop Rx"-->
+        <!--android:id="@+id/key"-->
+        <!--/>-->
+    <!--<Button-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_gravity="center_horizontal"-->
+        <!--android:text="Start/stop Rx"-->
+        <!--android:id="@+id/key2"-->
+        <!--/>-->
+
 </LinearLayout>

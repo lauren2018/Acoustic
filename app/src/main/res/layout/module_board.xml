@@ -3,21 +3,31 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
     android:id="@+id/module_board">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/txt1"
+            android:text="This is the module_board layout"
+            >
 
-    <Button
-        android:id = "@+id/add_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/constantAudioSource"
-        android:text="add"/>
+        </TextView>
 
-    <Button
-        android:id = "@+id/start_tx"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="start_tx"
-        />
+        <!--<Button-->
+            <!--android:id = "@+id/add_button"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="add"/>-->
+
+        <!--<Button-->
+            <!--android:id = "@+id/start_tx"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="start_tx"-->
+            <!--/>-->
+
+
 
 </LinearLayout>

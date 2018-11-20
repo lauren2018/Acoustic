@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import parsley.acoustic.activity.DragBoardLayout;
+import parsley.acoustic.view.blocks.DragBoardLayout;
 import parsley.acoustic.view.InPort;
 import parsley.acoustic.view.OutPort;
 
@@ -40,7 +40,7 @@ public class SDARBoard extends AppCompatActivity implements  View.OnTouchListene
         super.onCreate(savedInstanceState);
         setContentView(R.layout.module_board);
         LinearLayout mainLayout = (LinearLayout) findViewById(R.id.module_board);
-        mDragBoard = new DragBoardLayout(getApplicationContext(),mainLayout);
+        mDragBoard = new DragBoardLayout(getApplicationContext());
         mDragBoard.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -55,7 +55,7 @@ public class SDARBoard extends AppCompatActivity implements  View.OnTouchListene
         rlayout = (LinearLayout) findViewById(R.id.module_board);
         rlayout.setOrientation(LinearLayout.VERTICAL);
         rlayout.addView(mDragBoard, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-        addButton = (Button) findViewById(R.id.add_button);
+        //addButton = (Button) findViewById(R.id.add_button);
         addButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){

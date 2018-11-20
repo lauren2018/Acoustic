@@ -5,15 +5,12 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.os.Environment;
-import android.util.Log;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 
 import parsley.acoustic.acmath.Complex;
 import parsley.acoustic.acmath.IFFT;
@@ -21,10 +18,10 @@ import parsley.acoustic.digital.CyclicPrefix;
 import parsley.acoustic.digital.FSK;
 import parsley.acoustic.digital.QAM;
 import parsley.acoustic.signal.chirp;
+//import parsley.acoustic.signal.chirpView;
 import parsley.acoustic.tools.Array;
 
 import static android.media.AudioTrack.MODE_STREAM;
-import static android.media.AudioTrack.getMinBufferSize;
 
 public class Transceiver implements Runnable{
     private int sample_rate = 44100;

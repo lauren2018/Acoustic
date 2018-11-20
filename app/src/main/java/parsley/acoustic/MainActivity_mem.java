@@ -6,7 +6,6 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -15,7 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
-import parsley.acoustic.fragment.ModuleListFragment;
+import parsley.acoustic.view.fragment.ModuleListFragment;
 
 import static android.media.AudioTrack.MODE_STREAM;
 
