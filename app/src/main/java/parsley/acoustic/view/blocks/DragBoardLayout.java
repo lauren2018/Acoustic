@@ -11,7 +11,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -19,11 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import parsley.acoustic.view.blocks.BlockView;
-import parsley.acoustic.view.blocks.DragBoardView;
-import parsley.acoustic.view.InPort;
-import parsley.acoustic.view.OutPort;
-import parsley.acoustic.view.PopupWindowView;
+import parsley.acoustic.view.Port;
 
 /**
  * Created by tomsp on 2017/12/28.
@@ -38,9 +33,9 @@ public class DragBoardLayout extends RelativeLayout implements View.OnTouchListe
     private Map<Integer,BlockView> moduleList = new HashMap<Integer, BlockView>();
 
     private OnTouchListener mCableTouchListener;
-    private ArrayList<ArrayList<InPort>> inPortList = new ArrayList<ArrayList<InPort>>();
+    private ArrayList<ArrayList<Port>> inPortList = new ArrayList<ArrayList<Port>>();
     private ArrayList<ArrayList<OutPort>> outPortList = new ArrayList<ArrayList<OutPort>>();
-    private InPort focusInPort;
+    private Port focusPort;
     private boolean inPortSelected = false;
     private OutPort focusOutPort;
     private boolean outPortSelected = false;
@@ -120,7 +115,7 @@ public class DragBoardLayout extends RelativeLayout implements View.OnTouchListe
             case MotionEvent.ACTION_MOVE:
                 //delete the original cables
                 for(int i = 0; i < ((BlockView) view).getInPorts().size();i++){
-                    InPort tmp = ((BlockView) view).getInPorts().get(i);
+                    Port tmp = ((BlockView) view).getInPorts().get(i);
                     if(tmp.isConnected()){
                         view_disconnect_connect(tmp,tmp.getConnectedPort(),true);
                     }
@@ -128,7 +123,7 @@ public class DragBoardLayout extends RelativeLayout implements View.OnTouchListe
                 for(int i = 0; i < ((BlockView) view).getOutPorts().size();i++){
                     OutPort tmpo = ((BlockView) view).getOutPorts().get(i);
                     for(int j = 0; j < tmpo.getConnectedPorts().size();j++){
-                        InPort tmpi = tmpo.getConnectedPorts().get(j);
+                        Port tmpi = tmpo.getConnectedPorts().get(j);
                         view_disconnect_connect(tmpi,tmpo,true);
                     }
                 }
@@ -136,7 +131,7 @@ public class DragBoardLayout extends RelativeLayout implements View.OnTouchListe
                 view.setX(event.getRawX() + dX);
                 //add the new cables
                 for(int i = 0; i < ((BlockView) view).getInPorts().size();i++){
-                    InPort tmp = ((BlockView) view).getInPorts().get(i);
+                    Port tmp = ((BlockView) view).getInPorts().get(i);
                     if(tmp.isConnected()){
                         view_connect(tmp,tmp.getConnectedPort(),true);
                     }
@@ -144,7 +139,7 @@ public class DragBoardLayout extends RelativeLayout implements View.OnTouchListe
                 for(int i = 0; i < ((BlockView) view).getOutPorts().size();i++){
                     OutPort tmpo = ((BlockView) view).getOutPorts().get(i);
                     for(int j = 0; j < tmpo.getConnectedPorts().size();j++){
-                        InPort tmpi = tmpo.getConnectedPorts().get(j);
+                        Port tmpi = tmpo.getConnectedPorts().get(j);
                         view_connect(tmpi,tmpo,true);
                     }
                 }
@@ -183,26 +178,26 @@ addModule() add the new modules to the module list dragging board. Note that it 
             blockView.getInPorts().get(i).setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    InPort port = (InPort) v;
+                    Port port = (Port) v;
                     if(outPortSelected){
                         inPortSelected = true;
-                        focusInPort = port;
+                        focusPort = port;
                         //if they have been connected, delete the cable
-                        if(focusInPort.isConnected() && focusInPort.getConnectedPort() == focusOutPort){
-                            view_disconnect_connect(focusInPort,focusOutPort,false);
+                        if(focusPort.isConnected() && focusPort.getConnectedPort() == focusOutPort){
+                            view_disconnect_connect(focusPort,focusOutPort,false);
                         }
                         else{
                             //connect focusInport and focusOutport
-                            view_connect(focusInPort,focusOutPort,false);
+                            view_connect(focusPort,focusOutPort,false);
                         }
                         inPortSelected = false;
                         outPortSelected = false;
-                        focusInPort = null;
+                        focusPort = null;
                         focusOutPort = null;
                     }
                     else{
                         inPortSelected = true;
-                        focusInPort = (InPort) port;
+                        focusPort = (Port) port;
                     }
                 }
             });
@@ -217,16 +212,16 @@ addModule() add the new modules to the module list dragging board. Note that it 
                         outPortSelected = true;
                         focusOutPort = port;
                         //if they have been connected, delete the cable
-                        if(focusInPort.isConnected() && focusInPort.getConnectedPort() == focusOutPort){
-                            view_disconnect_connect(focusInPort,focusOutPort,false);
+                        if(focusPort.isConnected() && focusPort.getConnectedPort() == focusOutPort){
+                            view_disconnect_connect(focusPort,focusOutPort,false);
                         }
                         else{
                             //connect focusInport and focusOutport
-                            view_connect(focusInPort,focusOutPort,false);
+                            view_connect(focusPort,focusOutPort,false);
                         }
                         inPortSelected = false;
                         outPortSelected = false;
-                        focusInPort = null;
+                        focusPort = null;
                         focusOutPort = null;
                     }
                     else{
@@ -242,16 +237,16 @@ addModule() add the new modules to the module list dragging board. Note that it 
    true: temporarily
    false: permanently
 */
-    public void view_connect(InPort inPort, OutPort outPort, boolean reserved){
-        if(inPort != null && outPort != null){
-            int start_x = (int)getRelativeLeft(inPort)+inPort.getWidth()/2;
-            int start_y =  (int)getRelativeTop(inPort)+inPort.getHeight()/2;
+    public void view_connect(Port port, OutPort outPort, boolean reserved){
+        if(port != null && outPort != null){
+            int start_x = (int)getRelativeLeft(port)+ port.getWidth()/2;
+            int start_y =  (int)getRelativeTop(port)+ port.getHeight()/2;
             int end_x = (int)getRelativeLeft(outPort)+outPort.getWidth()/2;
             int end_y =(int)getRelativeTop(outPort)+outPort.getHeight()/2;
             drawCables(start_x,start_y,end_x,end_y);
             if(!reserved) {
-                inPort.setConnected(outPort);
-                outPort.setConnected(inPort);
+                port.setConnected(outPort);
+                outPort.setConnected(port);
             }
             //line.setOnTouchListener(mCableTouchListener);
             //this.addView(line);
@@ -264,16 +259,16 @@ addModule() add the new modules to the module list dragging board. Note that it 
         true: temporarily
         false: permanently
     */
-    public void view_disconnect_connect(InPort inPort, OutPort outPort, boolean reserved){
-        if(inPort != null && outPort != null){
-            int start_x = (int)getRelativeLeft(inPort)+inPort.getWidth()/2;
-            int start_y =  (int)getRelativeTop(inPort)+inPort.getHeight()/2;
+    public void view_disconnect_connect(Port port, OutPort outPort, boolean reserved){
+        if(port != null && outPort != null){
+            int start_x = (int)getRelativeLeft(port)+ port.getWidth()/2;
+            int start_y =  (int)getRelativeTop(port)+ port.getHeight()/2;
             int end_x = (int)getRelativeLeft(outPort)+outPort.getWidth()/2;
             int end_y =(int)getRelativeTop(outPort)+outPort.getHeight()/2;
             deleteCables(start_x,start_y,end_x,end_y);
             if(!reserved){
-                inPort.dismissConnected();
-                outPort.dismissConnected(inPort);
+                port.dismissConnected();
+                outPort.dismissConnected(port);
             }
 
             //line.setOnTouchListener(mCableTouchListener);

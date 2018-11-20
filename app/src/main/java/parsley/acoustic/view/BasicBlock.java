@@ -35,7 +35,7 @@ public class BasicBlock extends View {
 
     private void setParams(ArrayList<String> keys, Map<String, Param> params, int inPortNum, int outPortNum){
         mBlockHeight = mRowHeight * keys.size();
-        mBlockHeight = Math.max(mBlockHeight,Math.max(inPortNum,outPortNum)*(15+InPort.PORT_HEIGHT));
+        mBlockHeight = Math.max(mBlockHeight,Math.max(inPortNum,outPortNum)*(15+ Port.PORT_HEIGHT));
         int len = 0;
         for(int i = 0; i < keys.size();i++){
             if(keys.get(i).length() > len)

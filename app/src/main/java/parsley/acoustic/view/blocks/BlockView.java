@@ -4,29 +4,17 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import org.w3c.dom.Attr;
-import org.xmlpull.v1.XmlPullParser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import parsley.acoustic.R;
-import parsley.acoustic.view.BasicBlock;
-import parsley.acoustic.view.InPort;
-import parsley.acoustic.view.OutPort;
+import parsley.acoustic.view.Port;
 import parsley.acoustic.view.basic.Param;
 
 /**
@@ -37,8 +25,8 @@ public class BlockView extends RelativeLayout{
     /*variables on layout*/
     private BlockTemplate mBlock;
     /*variables on logic, params*/
-    private ArrayList<InPort> mInPorts = new ArrayList<InPort>();
-    private ArrayList<OutPort> mOutPorts = new ArrayList<OutPort>();
+    private ArrayList<Port> mPorts = new ArrayList<Port>();
+    private ArrayList<Port> mOutPorts = new ArrayList<Port>();
     private Map<String, TextView> mTexts= new HashMap<String, TextView>();
     protected int mInPortsNum;
     protected int mOutPortsNum;
@@ -104,17 +92,13 @@ public class BlockView extends RelativeLayout{
         for(int i = 0; i < keys.size();i++){
             Param p = params.get(keys.get(i));
             mParameters.put(keys.get(i),p);
-            String text = keys.get(i)+" : " + p.toString();
+            String text = p.toString();
             mTexts.get(keys.get(i)).setText(text);
         }
     }
 
-//    public Integer getBlockViewId(){
-//        return this.mBlockViewId;
-//    }
-
     @TargetApi(23)
-    private TextView createTagTextView(String s){
+    private TextView createKeyTextView(String s){
         TextView tag = new TextView(getContext());
         tag.setText(s);
         tag.setTextAppearance(R.style.TagTextView);
@@ -138,12 +122,6 @@ public class BlockView extends RelativeLayout{
         value.setSingleLine(true);
         value.setEllipsize(TextUtils.TruncateAt.valueOf("END"));
         value.setWidth((int)(mBlock.getBlockWidth()*3.0/4));
-//        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-//                LinearLayout.LayoutParams.WRAP_CONTENT);
-//        lp.weight = 3;
-        //value.setLayoutParams(lp);
-        //value.setEms(10);
-
         return value;
     }
 
@@ -153,8 +131,11 @@ public class BlockView extends RelativeLayout{
         rowParams.setOrientation(LinearLayout.HORIZONTAL);
         LinearLayout.LayoutParams params = getWrapContentParams();
         rowParams.setLayoutParams(params);
-        rowParams.addView(createTagTextView(key));
-        rowParams.addView(createValueTextView(value));
+        TextView keyView = createKeyTextView(key), valueView = createValueTextView(value);
+        rowParams.addView(keyView);
+        rowParams.addView(valueView);
+        /**store the key-textview pair into mTexts for later update*/
+        mTexts.put(key,valueView);
         return rowParams;
     }
 
@@ -185,11 +166,11 @@ public class BlockView extends RelativeLayout{
         return mParameters.get(key);
     }
 
-    public ArrayList<InPort> getInPorts(){
-        return this.mInPorts;
+    public ArrayList<Port> getInPorts(){
+        return this.mPorts;
     }
 
-    public ArrayList<OutPort> getOutPorts(){
+    public ArrayList<Port> getOutPorts(){
         return this.mOutPorts;
     }
 

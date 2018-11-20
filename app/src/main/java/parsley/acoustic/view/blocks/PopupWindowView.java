@@ -1,4 +1,4 @@
-package parsley.acoustic.view;
+package parsley.acoustic.view.blocks;
 
 import android.content.Context;
 import android.view.Gravity;
@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import parsley.acoustic.view.ParamsBox;
 import parsley.acoustic.view.blocks.BlockView;
 import parsley.acoustic.view.basic.Param;
 

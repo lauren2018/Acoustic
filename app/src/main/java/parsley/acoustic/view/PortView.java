@@ -8,15 +8,10 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 
+import parsley.acoustic.view.basic.DataType;
 import parsley.acoustic.view.blocks.BlockView;
 
-
-/**
- * Created by tomsp on 2017/12/20.
- */
-
-
-public class InPort extends View{
+public class PortView extends View {
     public  static final int PORT_WIDTH = 40;
     public  static final int PORT_HEIGHT = 40;
     private Paint mBlockPaint;
@@ -28,57 +23,50 @@ public class InPort extends View{
 
     private BlockView parentBlockView;
     private boolean isConnected = false;
-    private OutPort connectedPort = null;
+    private Port connectedPort = null;
+    private int mPortType = 0;
+    private DataType mDataType;
+    private Rect mRect;
 
-    public void _init(int left,int top, int right, int bottom){
+    public void init(Rect rect){
         mBlockPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mBlockPaint.setColor(Color.BLACK);
         mBlockPaint.setAlpha(70);
         mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mTextPaint.setTextSize(18);
-        mLeft = left;
-        mTop = top;
-        mRight = right;
-        mBottom = bottom;
-    }
-    public void _init(){
-        mBlockPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mBlockPaint.setColor(Color.BLACK);
-        mBlockPaint.setAlpha(70);
-        mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mTextPaint.setTextSize(18);
-        mLeft = 0;
-        mTop = 0;
-        mRight = PORT_WIDTH;
-        mBottom = PORT_HEIGHT;
+        mRect = rect;
     }
 
-    public InPort(Context context, int left,int top, int right, int bottom){
+    public PortView(Context context, Rect rect){
         super(context);
-        _init(left,top,right,bottom);
+        init(rect);
     }
 
-    public InPort(Context context, AttributeSet attrs, int left, int top, int right, int bottom){
+//    public Port(Context context, Rect rect, DataType d, int portType){
+//        super(context);
+//        init(rect, d, portType);
+//    }
+
+    public PortView(Context context, AttributeSet attrs, Rect rect){
         super(context,attrs);
-        _init(left,top,right,bottom);
-
+        init(rect);
     }
 
-    public InPort(Context context,BlockView blockView){
-        super(context);
-        parentBlockView = blockView;
-        _init();
-    }
+//    public Port(Context context, BlockView blockView){
+//        super(context);
+//        parentBlockView = blockView;
+//        _init();
+//    }
 
-    public InPort(Context context, AttributeSet attrs, BlockView blockView){
-        super(context,attrs);
-        parentBlockView = blockView;
-        _init();
-    }
+//    public Port(Context context, AttributeSet attrs, BlockView blockView){
+//        super(context,attrs);
+//        parentBlockView = blockView;
+//        _init();
+//    }
 
     protected void onDraw(Canvas canvas){
-        Rect rec = new Rect(mLeft,mTop,mRight,mBottom);
-        canvas.drawRect(rec,mBlockPaint);
+//        Rect rec = new Rect(mLeft,mTop,mRight,mBottom);
+        canvas.drawRect(mRect,mBlockPaint);
         canvas.drawText("1",(mLeft+mRight)/2, (mTop+mBottom)/2,mTextPaint);
     }
 
@@ -117,9 +105,9 @@ public class InPort extends View{
         setMeasuredDimension(width, height);
     }
 
-    public void setConnected(OutPort o){
+    public void setConnected(Port p){
         isConnected = true;
-        connectedPort = o;
+        connectedPort = p;
     }
     /*here reserve is a boolean value indicates that if these two ports are disconnected temporarily or permanently:
        true: temporarily
@@ -134,7 +122,7 @@ public class InPort extends View{
         return isConnected;
     }
 
-    public OutPort getConnectedPort(){return connectedPort;}
+    public Port getConnectedPort(){return connectedPort;}
 
     public BlockView getParentBlockView(){return this.parentBlockView;}
 

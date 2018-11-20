@@ -51,14 +51,6 @@ public class ModuleListFragment extends Fragment {
                     BlockView v = clickOnItemEvent(moduleBoard_frag,adapter,view, position);
                     moduleBoard_frag.setBlockViewListener(v);
                     fm.beginTransaction().hide(moduleList_frag).show(moduleBoard_frag).commitNow();
-//                    v.setOnTouchListener(new View.OnTouchListener() {
-//                        @Override
-//                        public boolean onTouch(View v, MotionEvent event) {
-//                            onBlockViewTouchEvent(View v, );
-//                            return false;
-//                        }
-//                    });
-                    int a = 0;
                 }
             });
         }
@@ -86,9 +78,6 @@ public class ModuleListFragment extends Fragment {
             Class tmp = Class.forName(className);
             Constructor cons = tmp.getDeclaredConstructor(Context.class,ArrayList.class,Map.class,Integer.class);
             BlockView newBlockView = (BlockView) cons.newInstance(getContext(),keys,kv,0);
-//            RelativeLayout moduleBoard_lo= getActivity().findViewById(R.id.moduleBoard_lo_id);
-//            moduleBoard_lo.addView(newBlockView);
-            int c = 1;
             return newBlockView;
         }catch (Exception e){
             //do nothing

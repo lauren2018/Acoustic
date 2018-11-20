@@ -3,7 +3,6 @@ package parsley.acoustic.view.blocks;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -13,8 +12,6 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import parsley.acoustic.R;
-import parsley.acoustic.view.InPort;
-import parsley.acoustic.view.OutPort;
 import parsley.acoustic.view.Port;
 import parsley.acoustic.view.basic.Param;
 
@@ -61,7 +58,7 @@ public class BlockTemplate extends View{
 
     private void setParams(ArrayList<String> keys, Map<String, Param> params, int inPortNum, int outPortNum){
         mBlockHeight = mRowHeight * (keys.size());
-        mBlockHeight = Math.max(mBlockHeight,Math.max(inPortNum,outPortNum)*(15+InPort.PORT_HEIGHT));
+        mBlockHeight = Math.max(mBlockHeight,Math.max(inPortNum,outPortNum)*(15+ Port.PORT_HEIGHT));
         int len = 0;
         for(int i = 0; i < keys.size();i++){
             if(keys.get(i).length() > len)
@@ -81,7 +78,7 @@ public class BlockTemplate extends View{
         int port_num = 0;
         if(mInPortNum > 0) port_num++;
         if(mOutPortNum > 0) port_num++;
-        int desiredWidth = port_num*InPort.PORT_WIDTH+ 2 * mMarginWidth+mBlockWidth,
+        int desiredWidth = port_num* Port.PORT_WIDTH+ 2 * mMarginWidth+mBlockWidth,
                 desiredHeight = 2*mMarginHeight+mBlockHeight;
         int widthMode = View.MeasureSpec.getMode(widthMeasureSpec);
         int widthSize = View.MeasureSpec.getSize(widthMeasureSpec);
@@ -118,10 +115,10 @@ public class BlockTemplate extends View{
         super.onDraw(canvas);
         //draw the module body
         int left,right,top,bottom;
-        left = mMarginWidth+ isAnyInPort*InPort.PORT_WIDTH;
-        top = mMarginHeight+isAnyOutport*InPort.PORT_HEIGHT;
-        right = mMarginWidth+ isAnyInPort*InPort.PORT_WIDTH+mBlockWidth;
-        bottom = mMarginHeight+isAnyOutport*InPort.PORT_HEIGHT+mBlockHeight;
+        left = mMarginWidth+ isAnyInPort* Port.PORT_WIDTH;
+        top = mMarginHeight+isAnyOutport* Port.PORT_HEIGHT;
+        right = mMarginWidth+ isAnyInPort* Port.PORT_WIDTH+mBlockWidth;
+        bottom = mMarginHeight+isAnyOutport* Port.PORT_HEIGHT+mBlockHeight;
         Rect rec = new Rect(left, top, right,bottom);
 
         int bound_left, bound_right, bound_top, bound_bottom;
@@ -135,22 +132,22 @@ public class BlockTemplate extends View{
         canvas.drawRect(rec, mModulePaint);
         Rect [] inPortViews = new Rect[mInPortNum];
         Rect [] outPortViews = new Rect[mOutPortNum];
-        int inportInterval = (mBlockHeight - mInPortNum*InPort.PORT_HEIGHT) / (mInPortNum+2);
-        int outportInterval = (mBlockHeight - mOutPortNum*InPort.PORT_HEIGHT) / (mOutPortNum+2);
+        int inportInterval = (mBlockHeight - mInPortNum* Port.PORT_HEIGHT) / (mInPortNum+2);
+        int outportInterval = (mBlockHeight - mOutPortNum* Port.PORT_HEIGHT) / (mOutPortNum+2);
         int inMarginVertical = (int)(1.5*inportInterval);
         int outMarginVertical = (int)(1.5*outportInterval);
         //draw InPorts
         for(int i = 0; i < mInPortNum; i++){
-            int tmptop = rec.top+inMarginVertical+rec.top + i*(inportInterval+InPort.PORT_HEIGHT);
-            inPortViews[i] = new Rect(rec.left-InPort.PORT_WIDTH, tmptop,
-                    rec.left,tmptop+InPort.PORT_HEIGHT);
-            canvas.drawRect(inPortViews[i],mInPortPaint);
+            int tmptop = rec.top+inMarginVertical+rec.top + i*(inportInterval+ Port.PORT_HEIGHT);
+            inPortViews[i] = new Rect(rec.left- Port.PORT_WIDTH, tmptop,
+                    rec.left,tmptop+ Port.PORT_HEIGHT);
+            //canvas.drawRect(inPortViews[i],mInPortPaint);
         }
         //draw Outports
         for(int i = 0; i < mOutPortNum; i++){
-            int tmptop = rec.top+outMarginVertical+rec.top + i*(outportInterval+OutPort.PORT_HEIGHT);
+            int tmptop = rec.top+outMarginVertical+rec.top + i*(outportInterval+Port.PORT_HEIGHT);
             outPortViews[i] = new Rect(rec.right, tmptop,
-                    rec.right+OutPort.PORT_WIDTH,tmptop+OutPort.PORT_HEIGHT);
+                    rec.right+Port.PORT_WIDTH,tmptop+Port.PORT_HEIGHT);
             canvas.drawRect(inPortViews[i],mOutPortPaint);
 
         }
