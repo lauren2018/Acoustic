@@ -5,4 +5,10 @@
     <color name="colorAccent">#D81B60</color>
     <color name="black">#000000</color>
     <color name="lavender">#E6E6FA</color>
+    <color name="royalblue">#4169E1</color>
+    <color name="tomato">#FF6347</color>
+    <color name="mediumorchid">#BA55D3</color>
+    <color name="seagreen">#2E8B57</color>
+    <color name="gold">#FFD700</color>
+    <color name="turquoise">#40E0D0</color>
 </resources>

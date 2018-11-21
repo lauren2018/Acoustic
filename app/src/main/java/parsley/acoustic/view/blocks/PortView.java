@@ -1,20 +1,20 @@
-package parsley.acoustic.view;
+package parsley.acoustic.view.blocks;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 
+import parsley.acoustic.R;
 import parsley.acoustic.view.basic.DataType;
-import parsley.acoustic.view.blocks.BlockView;
 
 public class PortView extends View {
     public  static final int PORT_WIDTH = 40;
     public  static final int PORT_HEIGHT = 40;
-    private Paint mBlockPaint;
+    private Paint mPortPaint;
     private Paint mTextPaint;
     private int mLeft=0;
     private int mTop=0;
@@ -22,24 +22,48 @@ public class PortView extends View {
     private int mBottom=20;
 
     private BlockView parentBlockView;
-    private boolean isConnected = false;
-    private Port connectedPort = null;
+
     private int mPortType = 0;
     private DataType mDataType;
     private Rect mRect;
+    private Port mParent;
 
-    public void init(Rect rect){
-        mBlockPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mBlockPaint.setColor(Color.BLACK);
-        mBlockPaint.setAlpha(70);
+    public void init(DataType d, Port parent){
+        mParent = parent;
+        mPortPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mDataType = d;
+        int color = 0xFFFFFF;
+        Resources resources = getResources();
+        switch(mDataType){
+            case COMPLEX:
+                color = resources.getColor(R.color.royalblue);
+                mPortPaint.setColor(color);
+                break;
+            case FLOAT:
+                color = resources.getColor(R.color.tomato);
+                break;
+            case BYTE:
+                color = resources.getColor(R.color.mediumorchid);
+                break;
+            case BIT:
+                color = resources.getColor(R.color.seagreen);
+            case STRING:
+                color = resources.getColor(R.color.gold);
+            case INTEGER:
+                color = resources.getColor(R.color.turquoise);
+            default:
+        }
+
+        mPortPaint.setColor(color);
+        mPortPaint.setAlpha(70);
         mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mTextPaint.setTextSize(18);
-        mRect = rect;
+        //mRect = rect;
     }
 
-    public PortView(Context context, Rect rect){
+    public PortView(Context context, DataType d, Port parent){
         super(context);
-        init(rect);
+        init(d,parent);
     }
 
 //    public Port(Context context, Rect rect, DataType d, int portType){
@@ -47,9 +71,9 @@ public class PortView extends View {
 //        init(rect, d, portType);
 //    }
 
-    public PortView(Context context, AttributeSet attrs, Rect rect){
+    public PortView(Context context, AttributeSet attrs, DataType d, Port parent){
         super(context,attrs);
-        init(rect);
+        init(d, parent);
     }
 
 //    public Port(Context context, BlockView blockView){
@@ -65,8 +89,9 @@ public class PortView extends View {
 //    }
 
     protected void onDraw(Canvas canvas){
-//        Rect rec = new Rect(mLeft,mTop,mRight,mBottom);
-        canvas.drawRect(mRect,mBlockPaint);
+
+        Rect rec = new Rect(0,0,PortView.PORT_WIDTH,PortView.PORT_HEIGHT);
+        canvas.drawRect(rec,mPortPaint);
         canvas.drawText("1",(mLeft+mRight)/2, (mTop+mBottom)/2,mTextPaint);
     }
 
@@ -105,25 +130,13 @@ public class PortView extends View {
         setMeasuredDimension(width, height);
     }
 
-    public void setConnected(Port p){
-        isConnected = true;
-        connectedPort = p;
-    }
-    /*here reserve is a boolean value indicates that if these two ports are disconnected temporarily or permanently:
-       true: temporarily
-       false: permanently
-   */
-    public void dismissConnected(){
-        isConnected = false;
-        connectedPort = null;
+
+
+    public Port getParentPort(){
+        return mParent;
     }
 
-    public boolean isConnected(){
-        return isConnected;
-    }
+    public Paint getPortPaint(){return mPortPaint;}
 
-    public Port getConnectedPort(){return connectedPort;}
-
-    public BlockView getParentBlockView(){return this.parentBlockView;}
 
 }

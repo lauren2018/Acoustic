@@ -1,4 +1,4 @@
-package parsley.acoustic.view.blocks;
+package parsley.acoustic.view;
 
 import android.content.Context;
 import android.graphics.Bitmap;

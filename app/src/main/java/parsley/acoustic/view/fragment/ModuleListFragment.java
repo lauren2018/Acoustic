@@ -78,10 +78,12 @@ public class ModuleListFragment extends Fragment {
             Class tmp = Class.forName(className);
             Constructor cons = tmp.getDeclaredConstructor(Context.class,ArrayList.class,Map.class,Integer.class);
             BlockView newBlockView = (BlockView) cons.newInstance(getContext(),keys,kv,0);
+
+            //cons.newInstance(getContext(),keys,kv,0);
             return newBlockView;
         }catch (Exception e){
             //do nothing
-            Log.e("Click","Exception!\n");
+            e.printStackTrace();
             return null;
         }
 

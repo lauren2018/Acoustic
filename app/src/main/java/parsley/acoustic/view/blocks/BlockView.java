@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import parsley.acoustic.R;
-import parsley.acoustic.view.Port;
 import parsley.acoustic.view.basic.Param;
 
 /**
@@ -25,8 +24,8 @@ public class BlockView extends RelativeLayout{
     /*variables on layout*/
     private BlockTemplate mBlock;
     /*variables on logic, params*/
-    private ArrayList<Port> mPorts = new ArrayList<Port>();
-    private ArrayList<Port> mOutPorts = new ArrayList<Port>();
+    protected ArrayList<Port> mInPorts = new ArrayList<Port>();
+    protected ArrayList<Port> mOutPorts = new ArrayList<Port>();
     private Map<String, TextView> mTexts= new HashMap<String, TextView>();
     protected int mInPortsNum;
     protected int mOutPortsNum;
@@ -42,44 +41,41 @@ public class BlockView extends RelativeLayout{
 
     public BlockView(Context context, Integer id){
         super(context);
-        _initViews();
+        //_initViews();
         //this.mBlockViewId = id;
     }
 
     public BlockView(Context context, AttributeSet attr, Integer id){
         super(context,attr);
-        _initViews();
+        //_initViews();
         //this.mBlockViewId = id;
     }
 
     public BlockView(Context context,  ArrayList<String> keys, Map<String, Param> params, Integer id){
         super(context);
+
+//        setParams(context);
+    }
+
+    public BlockView(Context context, AttributeSet attrs,  ArrayList<String> keys, Map<String, Param> params, Integer id){
+        super(context, attrs);
+    }
+
+    protected void setParams(Context context){
+        mBlock = new BlockTemplate(context,mParameterKeys,mParameters,mInPorts, mOutPorts);
+        mBlockLayout = new RelativeLayout(context);
+    }
+
+    protected void _initViews(Context context, ArrayList<String> keys, Map<String, Param> params, Integer id){
         for(int i = 0; i < keys.size();i++){
             mParameterKeys.add(keys.get(i));
             mParameters.put(keys.get(i),params.get(keys.get(i)));
         }
         setParams(context);
-        _initViews();
-        //this.mBlockViewId = id;
-    }
-
-    public BlockView(Context context, AttributeSet attrs,  ArrayList<String> keys, Map<String, Param> params, Integer id){
-        super(context, attrs);
-        _initViews();
-        //this.mBlockViewId = id;
-        setParams(context);
-    }
-
-    protected void setParams(Context context){
-        mBlock = new BlockTemplate(context,mParameterKeys,mParameters,mInPortsNum,mOutPortsNum);
-        mBlockLayout = new RelativeLayout(context);
-    }
-
-    protected void _initViews(){
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         LinearLayout blockParams = createBlockParamsView();
         lp.addRule(RelativeLayout.ALIGN_TOP,mBlock.getId());
-        lp.setMargins(20,20,10,0);
+        lp.setMargins(20+mBlock.getBlockRectLeft(),20,10,0);
         blockParams.setLayoutParams(lp);
         //lp.addRule(RelativeLayout.ALIGN_TOP,blockParams.getId());
         //this.setLayoutParams(lp);
@@ -142,6 +138,7 @@ public class BlockView extends RelativeLayout{
     private LinearLayout createBlockParamsView(){
         LinearLayout blockParams = new LinearLayout(getContext());
         LinearLayout.LayoutParams params = getWrapContentParams();
+        //params.setMargins(mBlock.getBlockRectLeft(),0,0,0);
         blockParams.setOrientation(LinearLayout.VERTICAL);
         blockParams.setLayoutParams(params);
         for(int i = 0; i < mParameterKeys.size();i++){
@@ -167,7 +164,7 @@ public class BlockView extends RelativeLayout{
     }
 
     public ArrayList<Port> getInPorts(){
-        return this.mPorts;
+        return this.mInPorts;
     }
 
     public ArrayList<Port> getOutPorts(){

@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import parsley.acoustic.R;
-import parsley.acoustic.view.Port;
+import parsley.acoustic.view.blocks.Port;
 import parsley.acoustic.view.blocks.PopupWindowView;
 import parsley.acoustic.view.blocks.BlockView;
 import parsley.acoustic.view.blocks.DragBoardLayout;
@@ -68,7 +68,7 @@ public class BoardFragment extends Fragment {
                     }
                 }
                 for(int i = 0; i < view.getOutPorts().size();i++){
-                    OutPort tmpo = view.getOutPorts().get(i);
+                    Port tmpo = view.getOutPorts().get(i);
                     for(int j = 0; j < tmpo.getConnectedPorts().size();j++){
                         Port tmpi = tmpo.getConnectedPorts().get(j);
 //                        view_disconnect_connect(tmpi,tmpo,true);
@@ -84,7 +84,7 @@ public class BoardFragment extends Fragment {
                     }
                 }
                 for(int i = 0; i < view.getOutPorts().size();i++){
-                    OutPort tmpo = view.getOutPorts().get(i);
+                    Port tmpo = view.getOutPorts().get(i);
                     for(int j = 0; j < tmpo.getConnectedPorts().size();j++){
                         Port tmpi = tmpo.getConnectedPorts().get(j);
 //                        view_connect(tmpi,tmpo,true);
