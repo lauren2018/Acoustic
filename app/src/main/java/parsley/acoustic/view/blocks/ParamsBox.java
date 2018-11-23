@@ -1,4 +1,4 @@
-package parsley.acoustic.view;
+package parsley.acoustic.view.blocks;
 
 import android.content.Context;
 import android.graphics.Color;

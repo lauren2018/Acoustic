@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="moduleBoard_lo_id" type="id" />
+    <item name="board_lo_id" type="id" />
+    <item name="dragBoard_lo_id" type="id" />
+    <item name="lineBoard_lo_id" type="id" />
+
 </resources>

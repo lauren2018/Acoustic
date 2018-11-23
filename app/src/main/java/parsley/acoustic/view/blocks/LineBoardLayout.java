@@ -1,4 +1,4 @@
-package parsley.acoustic.view;
+package parsley.acoustic.view.blocks;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -6,52 +6,28 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
-import android.util.AttributeSet;
-import android.view.View;
+import android.graphics.Rect;
+import android.widget.RelativeLayout;
 
-/**
- * Created by tomsp on 2017/12/29.
- */
-
-public class DragBoardView extends View {
-    private Paint mCablePaint;
-    private Paint mCanvasPaint;
+public class LineBoardLayout extends RelativeLayout {
     private Bitmap mBitmap;
+    private Paint mCablePaint;
     private Canvas mBitmapCanvas;
-    private int mBoardWidth;
-    private int mBoardHeight;
+    private DragBoardLayout mSiblingDragBoardLayout;
 
-    public DragBoardView(Context context){
-        this(context,null);
-    }
-
-    public DragBoardView(Context context, int width, int height){
-        this(context, null, width, height);
-    }
-
-    public DragBoardView(Context context, AttributeSet attrs){
-        super(context, attrs);
-        mBitmap = Bitmap.createBitmap(this.getWidth(),this.getHeight(), Bitmap.Config.ARGB_8888);
-        mBitmapCanvas = new Canvas(mBitmap);
-        mBitmapCanvas.drawColor(Color.GRAY);
-        mCablePaint = new Paint();
-        mCablePaint.setColor(Color.RED);
-        mCablePaint.setStrokeWidth(6);
-    }
-
-    public DragBoardView(Context context, AttributeSet attrs, int width, int height){
-        super(context, attrs);
-        mBoardWidth = width;
-        mBoardHeight = height;
+    public LineBoardLayout(Context context, int width, int height){
+        super(context);
         mBitmap = Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);
         mBitmapCanvas = new Canvas(mBitmap);
-        mBitmapCanvas.drawColor(Color.GRAY);
+        mBitmapCanvas.drawColor(Color.WHITE);
+        this.draw(mBitmapCanvas);
         mCablePaint = new Paint();
         mCablePaint.setColor(Color.RED);
         mCablePaint.setStrokeWidth(6);
-        mCanvasPaint = new Paint();
-        mCanvasPaint.setColor(Color.GRAY);
-
+//        mBitmapCanvas.drawRect(new Rect(
+//                20,20,200,200
+//        ), mCablePaint);
+        setWillNotDraw(false);
     }
 
     @Override
@@ -61,7 +37,7 @@ public class DragBoardView extends View {
         }
     }
 
-    public void draw(int s_x, int s_y, int e_x, int e_y){
+    public void connectPorts(int s_x, int s_y, int e_x, int e_y){
         int an_y = (e_y+s_y)/2;
         int  an_x = (e_x+s_x)/2;
         Point start, anchor1, anchor2, end;
@@ -84,13 +60,13 @@ public class DragBoardView extends View {
     }
 
     public void drawCables(int s_x, int s_y, int e_x, int e_y){
-        mCablePaint.setColor(Color.RED);
-        draw(s_x,s_y,e_x,e_y);
+        mCablePaint.setColor(Color.BLACK);
+        connectPorts(s_x,s_y,e_x,e_y);
     }
 
     public void deleteCables(int s_x, int s_y, int e_x, int e_y){
-        mCablePaint.setColor(Color.GRAY);
-        draw(s_x,s_y,e_x,e_y);
+        mCablePaint.setColor(Color.WHITE);
+        connectPorts(s_x,s_y,e_x,e_y);
     }
 
     @Override
@@ -99,5 +75,21 @@ public class DragBoardView extends View {
         setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
     }
 
+    public void initCanvas(int width, int height){
+        mBitmap = Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);
+        mBitmapCanvas = new Canvas(mBitmap);
+        mBitmapCanvas.drawColor(Color.GRAY);
+//        this.draw(mBitmapCanvas);
+        mCablePaint = new Paint();
+        mCablePaint.setColor(Color.RED);
+        mCablePaint.setStrokeWidth(6);
+        mBitmapCanvas.drawRect(new Rect(
+                20,20,200,200
+        ), mCablePaint);
 
+    }
+
+    public void setSiblingDragBoardLayout(DragBoardLayout d){
+        mSiblingDragBoardLayout = d;
+    }
 }

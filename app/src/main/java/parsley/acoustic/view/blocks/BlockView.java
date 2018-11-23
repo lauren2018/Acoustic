@@ -171,6 +171,8 @@ public class BlockView extends RelativeLayout{
         return this.mOutPorts;
     }
 
+    public BlockTemplate getBlockTemplate(){ return mBlock; }
+
 //    @Override
 //    public boolean onTouchEvent(MotionEvent event){
 ////        view = (BlockView) view;

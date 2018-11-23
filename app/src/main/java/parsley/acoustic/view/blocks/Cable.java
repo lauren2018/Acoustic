@@ -1,4 +1,4 @@
-package parsley.acoustic.view;
+package parsley.acoustic.view.blocks;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -19,6 +19,7 @@ public class Cable extends View {
     private int e_y=80;
     private Paint mLinePaint;
 
+
     public Cable(Context context, int s_x, int s_y, int e_x, int e_y){
         super(context);
         this.s_x = s_x;
@@ -36,6 +37,7 @@ public class Cable extends View {
         this.e_y = e_y;
         _initPaint();
     }
+
 
     @Override
     protected void onMeasure(int widthMeasureSpec,int heightMeasureSpec){

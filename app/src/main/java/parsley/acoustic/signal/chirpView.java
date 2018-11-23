@@ -5,6 +5,7 @@ import android.content.Context;
 import java.util.ArrayList;
 import java.util.Map;
 
+import parsley.acoustic.R;
 import parsley.acoustic.view.blocks.Port;
 import parsley.acoustic.view.basic.DataType;
 import parsley.acoustic.view.basic.Param;
@@ -18,10 +19,10 @@ public class chirpView extends BlockView {
 
     public chirpView(Context context, ArrayList<String> keys, Map<String, Param> params, Integer id){
         super(context,keys,params,id);
-        mInPorts.add(new Port(DataType.COMPLEX,0));
-        mInPorts.add(new Port(DataType.INTEGER,0));
-        mInPorts.add(new Port(DataType.INTEGER,0));
-        mOutPorts.add(new Port(DataType.FLOAT,1));
+        mInPorts.add(new Port(DataType.COMPLEX, R.integer.IN_PORT));
+        mInPorts.add(new Port(DataType.INTEGER,R.integer.IN_PORT));
+        mInPorts.add(new Port(DataType.INTEGER,R.integer.IN_PORT));
+        mOutPorts.add(new Port(DataType.FLOAT,R.integer.OUT_PORT));
         _initViews(context,keys,params, id);
 ;//        inports.add(new Port(context,));
 //        _initViews();

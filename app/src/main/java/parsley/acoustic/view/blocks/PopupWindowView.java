@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import parsley.acoustic.view.ParamsBox;
-import parsley.acoustic.view.blocks.BlockView;
 import parsley.acoustic.view.basic.Param;
 
 /**

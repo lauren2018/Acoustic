@@ -100,7 +100,8 @@ public class Port{
     }
 
     public PortView initPortView(Context context){
-        return new PortView(context, mDataType, this);
+        mPortView = new PortView(context, mDataType, this);
+        return mPortView;
     }
     //public BlockView getParentBlockView(){return this.parentBlockView;}
 

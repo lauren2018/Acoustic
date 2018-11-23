@@ -15,8 +15,10 @@ import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 
 import parsley.acoustic.view.blocks.DragBoardLayout;
+import parsley.acoustic.view.blocks.LineBoardLayout;
 import parsley.acoustic.view.fragment.BoardFragment;
 import parsley.acoustic.view.fragment.ModuleListFragment;
 
@@ -39,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     //layout
     DrawerLayout parentLayout;
     DragBoardLayout mDragBoard_lo;
+    RelativeLayout board_lo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,11 +115,11 @@ public class MainActivity extends AppCompatActivity {
     public void onStart(){
         super.onStart();
         BoardFragment fragment = (BoardFragment)fm.findFragmentByTag("module_board");
-        mDragBoard_lo = fragment.getDragBoardLayout();
-        mDragBoard_lo.initListener();
+        LineBoardLayout mLineBoard_lo = fragment.getLineBoardLayout();
+        //mDragBoard_lo.initListener();
         WindowManager wm = (WindowManager)getApplicationContext().getSystemService(getApplicationContext().WINDOW_SERVICE);
         Display display = wm.getDefaultDisplay();
-        mDragBoard_lo.initCanvas(display.getWidth(), display.getHeight());
+        //mLineBoard_lo.initCanvas(display.getWidth(), display.getHeight());
 
     }
 

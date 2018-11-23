@@ -8,6 +8,8 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 
+import java.util.ArrayList;
+
 import parsley.acoustic.R;
 import parsley.acoustic.view.basic.DataType;
 
@@ -27,6 +29,7 @@ public class PortView extends View {
     private DataType mDataType;
     private Rect mRect;
     private Port mParent;
+    private ArrayList<Cable> connectedCables;
 
     public void init(DataType d, Port parent){
         mParent = parent;
