@@ -17,6 +17,9 @@ import parsley.acoustic.acmath.IFFT;
 import parsley.acoustic.digital.CyclicPrefix;
 import parsley.acoustic.digital.FSK;
 import parsley.acoustic.digital.QAM;
+import parsley.acoustic.exp_signal.simpleChirp;
+import parsley.acoustic.exp_signal.simpleCos;
+import parsley.acoustic.exp_signal.simplePSK;
 import parsley.acoustic.signal.chirp;
 //import parsley.acoustic.signal.chirpView;
 import parsley.acoustic.tools.Array;
@@ -47,11 +50,42 @@ public class Transceiver implements Runnable{
 
     public Transceiver(){tx_config();}
 
+    private void general_signal_config(){
+//        simpleCos sc = new simpleCos();
+//        float f = 4000;
+//        int num = 256;
+//        sc.setParams(f, num, (float)(1.0/sample_rate));
+//        preamble_data = sc.genSignalSamples();
+/**Chirp*/
+        //        int f0 = 8000, f1 = 16000, num = 256;
+//        float [] t = new float[num];
+//        for(int i = 0; i < num; i++){
+//            t[i] = (float)i/sample_rate;
+//        }
+//        simpleChirp sc = new simpleChirp();
+//        preamble_data = simpleChirp.get_chirp(t, f0, (float)num / sample_rate, f1,0);
+/**PSK*/
+        simplePSK sc = new simplePSK();
+        float f = 4410;
+        sc.setParams(f, (float)(1.0/sample_rate));
+        preamble_data = sc.genSignalSamples();
+        int zeros = 2048;
+        audio_data = new short[preamble_data.length + zeros];
+        for(int i = 0; i < preamble_data.length+zeros;i++){
+            if(i < preamble_data.length){
+                audio_data[i] = (short)(preamble_data[i]*32767);
+            }else{
+                audio_data[i] = 0;
+            }
+        }
+    }
+
     private void tx_config(){
         //test_cos_config();
         // ofdm_config();
         //chirp_config();
-        fsk_config();
+        //fsk_config();
+        general_signal_config();
         write_to_file();
 
     }

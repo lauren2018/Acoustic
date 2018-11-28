@@ -23,7 +23,7 @@ import parsley.acoustic.view.fragment.BoardFragment;
 import parsley.acoustic.view.fragment.ModuleListFragment;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivityPlatform extends AppCompatActivity {
     //drawer_navigation_layout
     private String [] mNavSelections;
     private DrawerLayout mDrawerLayout;

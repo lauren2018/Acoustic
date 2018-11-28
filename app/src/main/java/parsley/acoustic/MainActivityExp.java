@@ -1,6 +1,7 @@
 package parsley.acoustic;
 
 import android.annotation.TargetApi;
+import android.graphics.Color;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
@@ -19,15 +20,15 @@ import parsley.acoustic.view.fragment.ModuleListFragment;
 import static android.media.AudioTrack.MODE_STREAM;
 
 
-public class MainActivity_mem extends AppCompatActivity {
+public class MainActivityExp extends AppCompatActivity {
     private Button key ;
     private Boolean isOn = false;
     //tx and rx
-//    Transceiver tx = new Transceiver();
-//    Thread tx_thread = new Thread(tx);
-//    Receiver rx = new Receiver();
-//    Thread rx_thread = new Thread(rx);
-//    int flag = 0;//0: Tx 1: Rx
+    Transceiver tx = new Transceiver();
+    Thread tx_thread = new Thread(tx);
+    Receiver rx = new Receiver();
+    Thread rx_thread = new Thread(rx);
+    int flag = 0;//0: Tx 1: Rx
     //layout
     private String [] mNavSelections;
     private DrawerLayout mDrawerLayout;
@@ -35,15 +36,15 @@ public class MainActivity_mem extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.navigation);
-        mNavSelections = getResources().getStringArray(R.array.nav_selections);
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList = (ListView) findViewById(R.id.left_nav);
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item,mNavSelections));
+        setContentView(R.layout.activity_main_exp);
+//        mNavSelections = getResources().getStringArray(R.array.nav_selections);
+//        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+//        mDrawerList = (ListView) findViewById(R.id.left_nav);
+//        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item,mNavSelections));
         //set the list's click listener
         //mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
         //InputStream inputStream = getResources().openRawResource(R.raw.data);
-/*
+
         key = (Button) findViewById(R.id.key);
         if (flag == 0) {
             key.setOnClickListener(new View.OnClickListener() {
@@ -95,7 +96,7 @@ public class MainActivity_mem extends AppCompatActivity {
                 }
             });
         }
-*/
+
     }
 
     @TargetApi(21)
