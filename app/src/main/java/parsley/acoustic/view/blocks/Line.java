@@ -12,15 +12,15 @@ import android.view.View;
  * Created by tomsp on 2017/12/28.
  */
 
-public class Cable extends View {
+public class Line extends View {
     private int s_x=0;
     private int s_y=0;
     private int e_x=80;
     private int e_y=80;
     private Paint mLinePaint;
+    private static int viewWidth = 4;
 
-
-    public Cable(Context context, int s_x, int s_y, int e_x, int e_y){
+    public Line(Context context, int s_x, int s_y, int e_x, int e_y){
         super(context);
         this.s_x = s_x;
         this.s_y = s_y;
@@ -29,7 +29,7 @@ public class Cable extends View {
         _initPaint();
     }
 
-    public Cable(Context context, AttributeSet attrs, int s_x, int s_y, int e_x, int e_y){
+    public Line(Context context, AttributeSet attrs, int s_x, int s_y, int e_x, int e_y){
         super(context,attrs);
         this.s_x = s_x;
         this.s_y = s_y;
@@ -41,12 +41,20 @@ public class Cable extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec,int heightMeasureSpec){
-        //int desiredWidth = PORT_WIDTH, desiredHeight = PORT_HEIGHT;
+        int desiredWidth, desiredHeight;
+        if(s_x == e_x){
+            desiredWidth = viewWidth;
+            desiredHeight = Math.abs(e_y - s_y);
+        }else{
+            desiredWidth = Math.abs(e_x - s_x);
+            desiredHeight = viewWidth;
+        }
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
         int width,height;
+
         //Measure Width
         if (widthMode == MeasureSpec.EXACTLY) {
             //Must be this size
@@ -56,7 +64,7 @@ public class Cable extends View {
             width = widthSize;
         } else {
             //Be whatever you want
-            width = widthSize;
+            width = desiredWidth;
         }
         //Measure Height
         if (heightMode == MeasureSpec.EXACTLY) {
@@ -64,11 +72,11 @@ public class Cable extends View {
             height = heightSize;
         } else if (heightMode == MeasureSpec.AT_MOST) {
             //Can't be bigger than...
-           // height = Math.min(desiredHeight, heightSize);
-            height = heightSize;
+           height = Math.min(desiredHeight, heightSize);
+           height = heightSize;
         } else {
             //Be whatever you want
-            height = heightSize;
+            height = desiredHeight;
         }
 
         //MUST CALL THIS
@@ -78,25 +86,23 @@ public class Cable extends View {
     @Override
     protected void onDraw(Canvas canvas){
         //Draw line with some algorithm.....
-        canvas.drawText("Hello",30,30,mLinePaint);
         int an_y = (e_y+s_y)/2;
-        int  an_x = (e_x+s_x)/2;
+        int an_x = (e_x+s_x)/2;
         Point start, anchor1, anchor2, end;
-        if(s_x > e_x){
-            start = new Point(s_x,s_y);
-            anchor1 = new Point(s_x, an_y);
-            anchor2 = new Point(e_x, an_y);
-            end = new Point(e_x,e_y);
-        }
-        else{
-            start = new Point(s_x,s_y);
-            anchor1 = new Point(an_x, s_y);
-            anchor2 = new Point(an_x, e_y);
-            end = new Point(e_x,e_y);
-        }
-        canvas.drawLine(start.x,start.y,anchor1.x,anchor1.y,mLinePaint);
-        canvas.drawLine(anchor1.x,anchor1.y,anchor2.x,anchor2.y,mLinePaint);
-        canvas.drawLine(anchor2.x,anchor2.y,end.x,end.y,mLinePaint);
+        canvas.drawLine(s_x,s_y,e_x,e_y, mLinePaint);
+//        if(s_x > e_x){
+//            start = new Point(s_x,s_y);
+//            anchor1 = new Point(s_x, an_y);
+//            anchor2 = new Point(e_x, an_y);
+//            end = new Point(e_x,e_y);
+//        }
+//        else{
+//            start = new Point(s_x,s_y);
+//            anchor1 = new Point(an_x, s_y);
+//            anchor2 = new Point(an_x, e_y);
+//            end = new Point(e_x,e_y);
+//        }
+//        canvas.drawLine(start.x,start.y,anchor1.x,anchor1.y,mLinePaint);
         return;
     }
 

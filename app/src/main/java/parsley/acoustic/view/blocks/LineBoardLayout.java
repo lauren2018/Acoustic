@@ -7,35 +7,45 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.widget.AbsoluteLayout;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
-public class LineBoardLayout extends RelativeLayout {
-    private Bitmap mBitmap;
-    private Paint mCablePaint;
-    private Canvas mBitmapCanvas;
-    private DragBoardLayout mSiblingDragBoardLayout;
+import java.util.ArrayList;
 
+import parsley.acoustic.R;
+
+public class LineBoardLayout extends FrameLayout {
+//    private Bitmap mBitmap;
+//    private Paint mCablePaint;
+//    private Canvas mBitmapCanvas;
+    private DragBoardLayout mSiblingDragBoardLayout;
+    private final int maxConnectedPorts = 10;
+    private final int maxPortNum = 200;
+//    private LineGroup [][] mLineGroups;
+    private ArrayList<LineGroup> mLineGroups = new ArrayList<>();
     public LineBoardLayout(Context context, int width, int height){
         super(context);
-        mBitmap = Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);
-        mBitmapCanvas = new Canvas(mBitmap);
-        mBitmapCanvas.drawColor(Color.WHITE);
-        this.draw(mBitmapCanvas);
-        mCablePaint = new Paint();
-        mCablePaint.setColor(Color.RED);
-        mCablePaint.setStrokeWidth(6);
+//        mBitmap = Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);
+//        mBitmapCanvas = new Canvas(mBitmap);
+//        mBitmapCanvas.drawColor(Color.WHITE);
+//        this.draw(mBitmapCanvas);
+//        mCablePaint = new Paint();
+//        mCablePaint.setColor(Color.RED);
+//        mCablePaint.setStrokeWidth(6);
 //        mBitmapCanvas.drawRect(new Rect(
 //                20,20,200,200
 //        ), mCablePaint);
         setWillNotDraw(false);
+//        mLineGroups = new LineGroup[maxPortNum][maxConnectedPorts];
     }
 
-    @Override
-    protected void onDraw(Canvas canvas){
-        if(mBitmap != null){
-            canvas.drawBitmap(mBitmap,0,0,mCablePaint);
-        }
-    }
+//    @Override
+//    protected void onDraw(Canvas canvas){
+//        if(mBitmap != null){
+//            canvas.drawBitmap(mBitmap,0,0,mCablePaint);
+//        }
+//    }
 
     public void connectPorts(int s_x, int s_y, int e_x, int e_y){
         int an_y = (e_y+s_y)/2;
@@ -53,20 +63,37 @@ public class LineBoardLayout extends RelativeLayout {
             anchor2 = new Point(an_x, e_y);
             end = new Point(e_x,e_y);
         }
-        mBitmapCanvas.drawLine(start.x,start.y,anchor1.x,anchor1.y,mCablePaint);
-        mBitmapCanvas.drawLine(anchor1.x,anchor1.y,anchor2.x,anchor2.y,mCablePaint);
-        mBitmapCanvas.drawLine(anchor2.x,anchor2.y,end.x,end.y,mCablePaint);
+//        mBitmapCanvas.drawLine(start.x,start.y,anchor1.x,anchor1.y,mCablePaint);
+//        mBitmapCanvas.drawLine(anchor1.x,anchor1.y,anchor2.x,anchor2.y,mCablePaint);
+//        mBitmapCanvas.drawLine(anchor2.x,anchor2.y,end.x,end.y,mCablePaint);
         invalidate();
     }
 
-    public void drawCables(int s_x, int s_y, int e_x, int e_y){
-        mCablePaint.setColor(Color.BLACK);
-        connectPorts(s_x,s_y,e_x,e_y);
+    public void drawCables(Port p1, Port p2, int s_x, int s_y, int e_x, int e_y){
+//        mCablePaint.setColor(Color.BLACK);
+        LineGroup lg = new LineGroup(getContext(),s_x,s_y,e_x,e_y, R.integer.BLOCK_RIGHT,R.integer.BLOCK_LEFT
+        ,p1.getPid(),p2.getPid());
+        mLineGroups.add(lg);
+        //int location = new location[];
+        p1.addLineGroup(lg);
+        p2.addLineGroup(lg);
+
+        drawLineGroup(lg);
+        //connectPorts(s_x,s_y,e_x,e_y);
     }
 
-    public void deleteCables(int s_x, int s_y, int e_x, int e_y){
-        mCablePaint.setColor(Color.WHITE);
-        connectPorts(s_x,s_y,e_x,e_y);
+    public void deleteCables(Port p1, Port p2, int s_x, int s_y, int e_x, int e_y){
+//        mCablePaint.setColor(Color.WHITE);
+        //connectPorts(s_x,s_y,e_x,e_y);
+        for(LineGroup lg:mLineGroups){
+            if(lg.getInPid() == p1.getPid() && lg.getOutPid() == p2.getPid()){
+                mLineGroups.remove(lg);
+                p1.removeLineGroup(lg);
+                p2.removeLineGroup(lg);
+                removeLineGroup(lg);
+                break;
+            }
+        }
     }
 
     @Override
@@ -75,21 +102,33 @@ public class LineBoardLayout extends RelativeLayout {
         setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
     }
 
-    public void initCanvas(int width, int height){
-        mBitmap = Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);
-        mBitmapCanvas = new Canvas(mBitmap);
-        mBitmapCanvas.drawColor(Color.GRAY);
-//        this.draw(mBitmapCanvas);
-        mCablePaint = new Paint();
-        mCablePaint.setColor(Color.RED);
-        mCablePaint.setStrokeWidth(6);
-        mBitmapCanvas.drawRect(new Rect(
-                20,20,200,200
-        ), mCablePaint);
 
-    }
 
     public void setSiblingDragBoardLayout(DragBoardLayout d){
         mSiblingDragBoardLayout = d;
+    }
+
+    public void drawLineGroup(LineGroup lg){
+        Line [] lines = lg.getLineViews();
+        int i = 0;
+        for(Line l:lines){
+            if (l != null){
+                //setCoordinate(x[i],y[i]);
+                this.addView(l);
+                i++;
+            }
+        }
+    }
+
+    public void removeLineGroup(LineGroup lg){
+        Line [] lines = lg.getLineViews();
+        int i = 0;
+        for(Line l:lines){
+            if (l != null){
+                //setCoordinate(x[i],y[i]);
+                this.removeView(l);
+            }
+            i++;
+        }
     }
 }

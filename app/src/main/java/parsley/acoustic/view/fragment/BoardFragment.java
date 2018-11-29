@@ -115,13 +115,13 @@ public class BoardFragment extends Fragment {
             //if these two ports have been connected
             if(currentFocusPort.isInConnectedPorts(lastClickedPort) &&
                     lastClickedPort.isInConnectedPorts(currentFocusPort)) {
-                if(lastClickedPort.getPortType() == R.integer.IN_PORT){
+                if(lastClickedPort.getPortType() == R.integer.OUT_PORT){
                     mDragBoard_lo.view_disconnect(lastClickedPort, currentFocusPort, false);
                 }else{
                     mDragBoard_lo.view_disconnect(currentFocusPort, lastClickedPort, false);
                 }
             }else{
-                if(lastClickedPort.getPortType() == R.integer.IN_PORT){
+                if(lastClickedPort.getPortType() ==R.integer.OUT_PORT){
                     mDragBoard_lo.view_connect(lastClickedPort, currentFocusPort, false);
                 }else{
                     mDragBoard_lo.view_connect(currentFocusPort, lastClickedPort, false);

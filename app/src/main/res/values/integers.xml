@@ -2,5 +2,6 @@
     <integer name="module_class_num">2</integer>
     <integer name="IN_PORT">0</integer>
     <integer name="OUT_PORT">1</integer>
-
+    <integer name="BLOCK_LEFT">0</integer>
+    <integer name="BLOCK_RIGHT">1</integer>
 </resources>

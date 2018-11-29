@@ -7,6 +7,7 @@ import android.widget.LinearLayout;
 
 import java.util.ArrayList;
 
+import parsley.acoustic.tools.Array;
 import parsley.acoustic.view.basic.DataType;
 
 
@@ -21,16 +22,23 @@ public class Port{
     private int mPortType;
     private boolean isConnected = false;
     private ArrayList<Port> connectedPorts = new ArrayList<>();
+    private ArrayList<LineGroup> lineGroups = new ArrayList<>();
+    private int pid;
+    private static int ct = 0;
 
     public Port(PortView v, DataType d, int portType){
         mPortView = v;
         mDataType = d;
         mPortType = portType;
+        pid = ct;
+        ct += 1;
     }
 
     public Port(DataType d, int portType){
         mDataType = d;
         mPortType = portType;
+        pid = ct;
+        ct += 1;
     }
 
     public DataType getDataType(){
@@ -104,5 +112,21 @@ public class Port{
         return mPortView;
     }
     //public BlockView getParentBlockView(){return this.parentBlockView;}
+
+
+    public ArrayList<LineGroup> getLineGroups() {
+        return lineGroups;
+    }
+
+    public void addLineGroup(LineGroup lg){
+        lineGroups.add(lg);
+    }
+
+    public void removeLineGroup(LineGroup lg){
+        lineGroups.remove(lg);
+    }
+
+    public int getPid(){return pid;}
+
 
 }

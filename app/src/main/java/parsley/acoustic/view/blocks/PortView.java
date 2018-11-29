@@ -29,7 +29,7 @@ public class PortView extends View {
     private DataType mDataType;
     private Rect mRect;
     private Port mParent;
-    private ArrayList<Cable> connectedCables;
+    private ArrayList<Line> connectedCables;
 
     public void init(DataType d, Port parent){
         mParent = parent;
