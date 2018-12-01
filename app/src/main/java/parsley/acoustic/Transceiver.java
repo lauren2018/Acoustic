@@ -398,6 +398,68 @@ public class Transceiver implements Runnable{
 
     }
 
+    private void lora_chirp_config(){
+        int spreadingFactor = 8;
+        int samplesInChirp = (int)Math.pow(2,spreadingFactor);
+        int BW = sample_rate / 2;
+        float fmin = -BW/2, fmax = BW/2;
+        float df = BW/(samplesInChirp-1);
+        chirp ch1 = new chirp();
+        /**using four upchirp as the preamble*/
+        int upchirpNum = 4;
+        float [] x = new float[samplesInChirp];
+        for(int i = 0; i < samplesInChirp;i++){
+            x[i] = (float)i/sample_rate;
+        }
+        float [] preChirp = ch1.get_chirp(x, fmin, df, 0);
+        for(int i = 0; i < upchirpNum;i++){
+            preamble_data[i] = preChirp[i % x.length];
+        }
+
+        /**Payload*/
+        /**If the spreading factor is the multiple of 4, using this as the payload*/
+        byte [] raw_data_1 = {
+                0x5d,0x71,0x62,0x57,0x21,0x79,0x32,0x1f,0xe,0x22,0x57,0x15,0x34,0x50,0x6c,0x4,0x18,0x11,0x45,
+                0x13,0x35,0x7e,0x1,0x11,0x48,0x8
+        };
+        /**If the spreading factor is 6, using this as the payload*/
+        byte [] raw_data_2 = {
+                0x3d,0x21,0x12,0x17,0x21,0x9,0x32,0x1f,0xe,0x22,0x37,0x15,0x34,0x20,0x1c,0x4,0x18,0x11,0x25,
+                0x13,0x35,0x3e,0x1,0x11,0x28,0x8
+        };
+        byte [] raw_data = raw_data_2;
+        int payloadNum = 0;
+        for(byte b: raw_data){
+            chirp tmpchirp = new chirp();
+            if(b == 0){
+                for(float sample: tmpchirp.get_chirp(x, fmin, df,0)){
+                    payload_data[payloadNum++] = sample;
+                }
+            }else{
+                for(float sample: tmpchirp.get_chirp(x, 0, samplesInChirp-b, fmin, df,0)){
+                    payload_data[payloadNum++] = sample;
+                }
+                for(float sample: tmpchirp.get_chirp(x, samplesInChirp-b, samplesInChirp, fmin, df, 0)){
+                    payload_data[payloadNum++] = sample;
+                }
+            }
+        }
+        /**Concatnate preamble, zero, and payload*/
+        int zeronum = 64;
+        short MAX_SHORT = 32767;
+        int data_len = preamble_data.length+zeronum+payload_data.length;
+        audio_data = new short[data_len];
+        for(int i = 0; i < data_len;i++){
+            if(i < preamble_data.length)
+                audio_data[i] = (short)(preamble_data[i]*MAX_SHORT);
+            else if(i < preamble_data.length+zeronum)
+                audio_data[i] = 0;
+            else
+                audio_data[i] = (short)(payload_data[i-preamble_data.length-zeronum] *MAX_SHORT);
+        }
+    }
+
+
     private void write_to_file(){
         try{
             setOutputFile();

@@ -17,6 +17,9 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 
+import java.util.Stack;
+import java.util.Vector;
+
 import parsley.acoustic.view.blocks.DragBoardLayout;
 import parsley.acoustic.view.blocks.LineBoardLayout;
 import parsley.acoustic.view.fragment.BoardFragment;
@@ -59,6 +62,10 @@ public class MainActivityPlatform extends AppCompatActivity {
         mDrawerList = (ListView) findViewById(R.id.left_nav);
         mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item,mNavSelections));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+
+
+        String str = "((((1,1,0),(1,0,1)),((2,1,0),(2,0,1))),(((3,1,0),(3,0,1)),((4,1,0),(4,0,1))))";
+        stringToArray(str);
     }
 
     public class DrawerItemClickListener implements ListView.OnItemClickListener {
@@ -124,4 +131,53 @@ public class MainActivityPlatform extends AppCompatActivity {
     }
 
     public void onMoudleSelected(){}
+
+
+    private void stringToArray(String str){
+        Stack st = new Stack();
+        int b = 0, e = 0, idx = 0;
+        int d = -1;
+        boolean firstRightParenthesis = true;
+        Vector[] allVectors = null;
+        for(int i = 0; i < str.length();i++){
+            if (str.charAt(i) == '('){
+                st.push(i);
+            }else if(str.charAt(i) == ')' && firstRightParenthesis){
+                /**Init d dimensions for all vectors*/
+                firstRightParenthesis = false;
+                d = st.size();
+                allVectors = new Vector[d];
+                for(int j = 0; j < d;j++){allVectors[j] = new Vector();}
+
+                idx = st.size()-1;
+                b = (int)st.pop()+1;
+                e = i;
+                for(String substr: str.substring(b,e).split(" *, *")){
+                    allVectors[idx].add(Integer.parseInt(substr));
+                }
+                allVectors[idx-1].add(allVectors[idx]);
+                allVectors[idx] = new Vector();
+            }else if(str.charAt(i) == ')' && !firstRightParenthesis){
+                if(st.size() == d){
+                    idx = st.size()-1;
+                    b = (int)st.pop()+1;
+                    e = i;
+                    Vector unit = new Vector();
+                    for(String substr: str.substring(b,e).split(" *, *")){
+                        allVectors[idx].add(Integer.parseInt(substr));
+                    }
+                    allVectors[idx-1].add(allVectors[idx]);
+                    allVectors[idx] = new Vector();
+                }else if(st.size() > 1){
+                    idx = st.size()-1;
+                    allVectors[idx-1].add(allVectors[idx]);
+                    allVectors[idx] = new Vector();
+                    st.pop();
+                }
+            }
+
+        }
+        Vector root = allVectors[0];
+        int c = 1;
+    }
 }

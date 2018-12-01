@@ -37,13 +37,6 @@ public class MainActivityExp extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_exp);
-//        mNavSelections = getResources().getStringArray(R.array.nav_selections);
-//        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-//        mDrawerList = (ListView) findViewById(R.id.left_nav);
-//        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item,mNavSelections));
-        //set the list's click listener
-        //mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
-        //InputStream inputStream = getResources().openRawResource(R.raw.data);
 
         key = (Button) findViewById(R.id.key);
         if (flag == 0) {
