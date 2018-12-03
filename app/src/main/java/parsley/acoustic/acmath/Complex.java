@@ -14,6 +14,13 @@ public class Complex{
         this.real=real;
         this. imag = imag;
     }
+
+    public static Complex polar(double ampl, double phase){
+        Complex x = new Complex();
+        x.real = ampl*Math.cos(phase);
+        x.imag = ampl*Math.sin(phase);
+        return x;
+    }
     public double getReal()  { return this.real;    }
     public double getImag() { return this. imag;    }
     public double getReal(Complex c)    {    return c.real;        }

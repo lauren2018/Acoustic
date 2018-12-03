@@ -14,6 +14,9 @@ import java.util.Arrays;
 
 import parsley.acoustic.acmath.Complex;
 import parsley.acoustic.acmath.IFFT;
+import parsley.acoustic.code.HammingEncoding;
+import parsley.acoustic.code.Interleave;
+import parsley.acoustic.code.LoRaMod;
 import parsley.acoustic.digital.CyclicPrefix;
 import parsley.acoustic.digital.FSK;
 import parsley.acoustic.digital.QAM;
@@ -85,9 +88,9 @@ public class Transceiver implements Runnable{
         // ofdm_config();
         //chirp_config();
         //fsk_config();
-        general_signal_config();
-        write_to_file();
-
+        //general_signal_config();
+        //write_to_file();
+        lora_chirp_config_gnuradio();
     }
 
     private void ofdm_config(){
@@ -459,38 +462,122 @@ public class Transceiver implements Runnable{
         }
     }
 
+    private void lora_chirp_config_gnuradio(){
+        Byte [] raw_data = {
+            72, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 58, 32, 48
+        };
 
-    private void write_to_file(){
+        Byte [] nybbles = new Byte[raw_data.length*2];
+        for(int i = 0; i < raw_data.length;i++){
+            nybbles[2*i] = (byte)((raw_data[i] & 0xF0) >> 4);
+            nybbles[2*i+1] = (byte)(raw_data[i] & 0xF);
+        }
+
+        //new ArrayList<Element>(Arrays.asList(array));
+        HammingEncoding hm1 = new HammingEncoding(new ArrayList<Byte>(Arrays.asList(nybbles)));
+        ArrayList<Byte> data1 = hm1.getOutput();
+        Byte [] data1_array = (Byte []) data1.toArray(new Byte[data1.size()]);
+        String [] str= new String[data1_array.length];
+        for(int j = 0; j < data1_array.length;j++){
+            byte b = data1_array[j];
+            String tmp = "";
+            for(int i = 0; i < 8; i++){
+                tmp = Integer.toString(0x1 & (b >> i)) + tmp;
+            }
+            str[j] = tmp;
+        }
+
+        write_to_file("tx_symbols_lora_hm",str);
+
+        Interleave il1 = new Interleave(data1);
+        ArrayList<Short> data2 = il1.getOutput();
+        Short [] data2_array = (Short []) data2.toArray(new Short[data2.size()]);
+        String [] str2= new String[data2_array.length];
+        for(int j = 0; j < data2_array.length;j++){
+            short b = data2_array[j];
+            String tmp = "";
+            for(int i = 0; i < 16; i++){
+                tmp = Integer.toString(0x1 & (b >> i)) + tmp;
+            }
+            str2[j] = tmp;
+        }
+        write_to_file("tx_symbols_lora_il",str2);
+
+        LoRaMod lrm = new LoRaMod(data2);
+        ArrayList<Float> data3 = lrm.getOutput();
+
+        audio_data = new short[data3.size()];
+        for(int i = 0; i < audio_data.length;i++){
+            audio_data[i] = (short)(data3.get(i) * 32767);
+        }
+
+        write_to_file("tx_samples_lora",audio_data);
+    }
+
+    private void write_to_file(String name, short [] array){
         try{
-            setOutputFile();
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
-        if(file_flag == 0){
-            for(short data : audio_data){
-                try{
-                    bw.write(Short.toString(data)+" ");
-                }
-                catch(Exception e){
+            setOutputFile(name);
+            for(short data : array) {
+                try {
+                    bw.write(Short.toString(data) +  '\n');
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-        }else{
-            for(int data : bit_data){
-                try{
-                    bw.write(Integer.toString(data)+" ");
-                }
-                catch(Exception e){
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        try{
             bw.flush();
             bw.close();
-        }catch(Exception e){
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void write_to_file(String name, Short [] array){
+        try{
+            setOutputFile(name);
+            for(float data : array) {
+                try {
+                    bw.write(Float.toString(data) +  '\n');
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            bw.flush();
+            bw.close();
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void write_to_file(String name, Byte [] array){
+        try{
+            setOutputFile(name);
+            for(byte data : array) {
+                try {
+                    bw.write(Float.toString(data) + '\n');
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            bw.flush();
+            bw.close();
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void write_to_file(String name, String [] array){
+        try{
+            setOutputFile(name);
+            for(String data : array) {
+                try {
+                    bw.write(data + '\n');
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            bw.flush();
+            bw.close();
+        } catch(Exception e){
             e.printStackTrace();
         }
     }
@@ -519,13 +606,9 @@ public class Transceiver implements Runnable{
         audio.stop();
     }
 
-    private void setOutputFile() throws Exception{
+    private void setOutputFile(String name) throws Exception{
         String path="";
-        if(file_flag == 0){
-            path = Environment.getExternalStorageDirectory()+"/"+"tx_audio.txt";
-        }else{
-            path = Environment.getExternalStorageDirectory()+"/"+"tx_audio_bits.txt";
-        }
+        path = Environment.getExternalStorageDirectory()+"/"+name;
         File file = new File(path);
         file.createNewFile();
         fw = new FileWriter(path, false);

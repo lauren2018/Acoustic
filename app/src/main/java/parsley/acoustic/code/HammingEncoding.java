@@ -10,8 +10,15 @@ public class HammingEncoding {
     private final int HAMMING_P8_BITMASK=0XFF;
 
 
-    private ArrayList<Byte> in;
-    private ArrayList<Byte> out;
+    private ArrayList<Byte> in = new ArrayList<>();
+    private ArrayList<Byte> out = new ArrayList<>();
+
+    public HammingEncoding(ArrayList<Byte> data_in){
+        for(Byte b:data_in){
+            in.add(b);
+        }
+        work();
+    }
 
     public void work(){
         byte p1,p2,p4,p8;
@@ -40,5 +47,9 @@ public class HammingEncoding {
             shiftme = shiftme >> 1;
         }
         return (byte)(parity % 2);
+    }
+
+    public ArrayList<Byte> getOutput(){
+        return out;
     }
 }
