@@ -6,9 +6,14 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.os.Environment;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -23,9 +28,11 @@ import parsley.acoustic.digital.QAM;
 import parsley.acoustic.exp_signal.simpleChirp;
 import parsley.acoustic.exp_signal.simpleCos;
 import parsley.acoustic.exp_signal.simplePSK;
+import parsley.acoustic.packet.PacketGen;
 import parsley.acoustic.signal.chirp;
 //import parsley.acoustic.signal.chirpView;
 import parsley.acoustic.tools.Array;
+import parsley.acoustic.view.blocks.Port;
 
 import static android.media.AudioTrack.MODE_STREAM;
 
@@ -38,7 +45,6 @@ public class Transceiver implements Runnable{
     private int pream_sample_num = 256;
     private float fmin = (float)6e3, fmax = (float)16e3;
     private Boolean isOn;
-    private int subcarrier_num = 128;
     //data to be sent
     private float [] preamble_data;
     private int [] bit_data;
@@ -85,12 +91,12 @@ public class Transceiver implements Runnable{
 
     private void tx_config(){
         //test_cos_config();
-        // ofdm_config();
+        ofdm_config();
         //chirp_config();
         //fsk_config();
         //general_signal_config();
         //write_to_file();
-        lora_chirp_config_gnuradio();
+        //lora_chirp_config_gnuradio();
     }
 
     private void ofdm_config(){
@@ -103,8 +109,8 @@ public class Transceiver implements Runnable{
         float [] pre_first = ch1.get_chirp(x,fmin,(float)pream_sample_num/sample_rate,fmax,0);
         float phase = ch1.get_phase();
         float [] pre_last = ch2.get_chirp(x,fmax,(float)pream_sample_num/sample_rate,fmin,phase);
-        chirp ch3 = new chirp();
-        float [] test = ch3.get_chirp(x,fmax,(float)pream_sample_num/sample_rate,fmin,phase);
+//        chirp ch3 = new chirp();
+//        float [] test = ch3.get_chirp(x,fmax,(float)pream_sample_num/sample_rate,fmin,phase);
         preamble_data = new float[2*pream_sample_num];
         for(int i = 0; i < 2*pream_sample_num; i++){
             if(i < pream_sample_num){
@@ -115,6 +121,7 @@ public class Transceiver implements Runnable{
         }
 
         //payload+pilot
+        /*
         QAM qam = new QAM(16);
         Byte [] raw_data = {
                 0x5d,0x71,0x62,0x57,0x21,0x79,0x32,0x1f,0xe,0x22,0x57,0x15,0x34,0x50,0x6c,0x4,0x18,0x11,0x45,
@@ -145,75 +152,187 @@ public class Transceiver implements Runnable{
                 j++;
             }
         }
-
-        Complex [] qam_symbols_data = new Complex[K];
-        //payload setting (we regulate that pilot symbols cannot take the first and the (N // 2)th subchannel)
-        j = 1;
-        for(int i = 0; i <= payload_carriers.length;i++){
-            if(i == 0)
-                qam_symbols_data[0] = new Complex(qam_symbols_payload.get(0).getReal(),0);
-            else if(i == payload_carriers.length)
-                qam_symbols_data[subcarrier_num] = new Complex(qam_symbols_payload.get(0).getImag(),0);
-            else {
-                int tmpcarrier = payload_carriers[i];
-                int tmpcarrier_sym = K - tmpcarrier;
-                qam_symbols_data[tmpcarrier] = qam_symbols_payload.get(j);
-                qam_symbols_data[tmpcarrier_sym] = qam_symbols_payload.get(j).conjugate();
+*/
+        int [] bits = read_from("QPSK.txt", 2048);
+        Complex [] complex_sig = get_complex_from_bits(bits);
+        int selected_complex_sig_num = 128;
+        Complex [] selected_complex_sig = select_complex_sig(complex_sig, selected_complex_sig_num);
+        int subcarrier_num = 128;
+        double fmin = 6000;
+        double fmax = 7000;
+        double df = 22050 / subcarrier_num;
+        int freqIdx_b = 0, freqIdx_e = 0;
+        double f = 0;
+        for(int i = 0; i < subcarrier_num; i++){
+            if(f >= fmin && f -df < fmin){
+                freqIdx_b = i;
+            }
+            if(f <= fmax && f +df > fmax){
+                freqIdx_e = i;
+            }
+            f += df;
+        }
+        int occupy_subcarrier_num = freqIdx_e-freqIdx_b+1;
+        int ofdm_symbols_num = selected_complex_sig_num / occupy_subcarrier_num + 1;
+        Complex [] ofdm_samples_1 = new Complex[ofdm_symbols_num*subcarrier_num];
+        int i = 0, j = 0;
+        while(i < ofdm_symbols_num * subcarrier_num){
+            if(j < selected_complex_sig_num && i % 128 >= freqIdx_b && i % 128 <= freqIdx_e){
+                ofdm_samples_1[i] = selected_complex_sig[j];
                 j++;
+            }else{
+                ofdm_samples_1[i] = new Complex(0,0);
+            }
+            i++;
+        }
+        /**conj reverse*/
+        Complex [] ofdm_samples_2 = new Complex[2*ofdm_samples_1.length];
+        int samples_each_symbol = 2*subcarrier_num;
+        for(i = 0,j=0; i <= ofdm_samples_2.length-samples_each_symbol;i+=samples_each_symbol,j+=subcarrier_num){
+            for(int i1 = 0; i1 < samples_each_symbol;i1++){
+                if(i1 == 0){
+                    ofdm_samples_2[i+i1] = new Complex(ofdm_samples_1[j].getReal(),0);
+                }else if(i1 == subcarrier_num){
+                    ofdm_samples_2[i+i1] = new Complex(ofdm_samples_1[j].getImag(),0);
+                }else if(i1 > 0 && i1 < subcarrier_num){
+                    ofdm_samples_2[i+i1] = ofdm_samples_1[j+i1];
+                }else{
+                    ofdm_samples_2[i+i1] = ofdm_samples_1[j+samples_each_symbol-i1].conjugate();
+                }
             }
         }
-        //pilot setting
+
+        /**ifft*/
+        int fft_size = samples_each_symbol;
+        Complex [] ifft_samples = new Complex[ofdm_samples_2.length];
+        for(i = 0; i <= ifft_samples.length-fft_size;i += fft_size){
+            Complex [] ifft_samples_chunk = subarray(ofdm_samples_2, i,i+fft_size);
+            Complex [] tmp = IFFT.ifft(ifft_samples_chunk);
+            j = 0;
+            for(Complex c: tmp){
+                ifft_samples[i+j] = c;
+                j += 1;
+            }
+        }
+
+        /**get real and add cyclic prefix*/
+        int zero_num_per_symbol = fft_size;
+        int payload_data_length = ifft_samples.length *(fft_size+zero_num_per_symbol) / fft_size;
+        double [] payload_data = new double[payload_data_length];
         j = 0;
-        for(int i = 0; i < pilot.length;i++){
-            int tmpcarrier = pilot_carriers[i];
-            int tmpcarrier_sym = K - tmpcarrier;
-            qam_symbols_data[tmpcarrier] = pilot[j];
-            qam_symbols_data[tmpcarrier_sym] =pilot[j].conjugate();
-            j++;
-        }
-
-
-//        for(int i = 0; i < K;i++){
-//            if(i == 0)
-//                qam_symbols_data[i] = new Complex(qam_symbols_payload.get(0).getReal(),0);
-//            else if(i == N)
-//                qam_symbols_data[i] = new Complex(qam_symbols_payload.get(0).getImag(),0);
-//            else if(i < N)
-//                qam_symbols_data[i] = qam_symbols_payload.get(i);
-//            else
-//                qam_symbols_data[i] = qam_symbols_payload.get(K-i).conjugate();
-//        }
-        Complex [] ofdm_symbols = IFFT.ifft(qam_symbols_data);
-
-        float [] audio_data_nocp = new float[ofdm_symbols.length];
-        float max = 0, tmp;
-        for(int i = 0; i < ofdm_symbols.length;i++){
-            tmp = (float)ofdm_symbols[i].getReal();
-            audio_data_nocp[i] = tmp;
-            if (Math.abs(tmp) > max){
-                max = Math.abs(tmp);
+        for(i = 0; i < payload_data.length;i++){
+            if(i % (zero_num_per_symbol+fft_size) < zero_num_per_symbol){
+                payload_data[i] = 0;
+            }else{
+                payload_data[i] = ifft_samples[j].getReal();
+                j += 1;
             }
         }
-        CyclicPrefix cp = new CyclicPrefix(cp_ratio);
-        float [] float_audio_data = cp.add_cp(audio_data_nocp);
-        //padding zeros and concatenate
-        double time = 0.005;
-        int zeronum = 256;
-        int data_len = preamble_data.length + zeronum + float_audio_data.length;
+        double maxV = 0;
+        int maxI = 0;
+        for(i = 0; i < payload_data_length;i++){
+            if (Math.abs(payload_data[i]) > maxV){
+                maxV = Math.abs(payload_data[i]);
+                maxI = i;
+            }
+        }
+        for(i = 0; i < payload_data_length;i++){
+            payload_data[i] = payload_data[i] * 1 / maxV;
+        }
+//        Complex [] qam_symbols_data = new Complex[K];
+//        //payload setting (we regulate that pilot symbols cannot take the first and the (N // 2)th subchannel)
+//        j = 1;
+//        for(int i = 0; i <= payload_carriers.length;i++){
+//            if(i == 0)
+//                qam_symbols_data[0] = new Complex(qam_symbols_payload.get(0).getReal(),0);
+//            else if(i == payload_carriers.length)
+//                qam_symbols_data[subcarrier_num] = new Complex(qam_symbols_payload.get(0).getImag(),0);
+//            else {
+//                int tmpcarrier = payload_carriers[i];
+//                int tmpcarrier_sym = K - tmpcarrier;
+//                qam_symbols_data[tmpcarrier] = qam_symbols_payload.get(j);
+//                qam_symbols_data[tmpcarrier_sym] = qam_symbols_payload.get(j).conjugate();
+//                j++;
+//            }
+//        }
+//        //pilot setting
+//        j = 0;
+//        for(int i = 0; i < pilot.length;i++){
+//            int tmpcarrier = pilot_carriers[i];
+//            int tmpcarrier_sym = K - tmpcarrier;
+//            qam_symbols_data[tmpcarrier] = pilot[j];
+//            qam_symbols_data[tmpcarrier_sym] =pilot[j].conjugate();
+//            j++;
+//        }
+//
+//
+////        for(int i = 0; i < K;i++){
+////            if(i == 0)
+////                qam_symbols_data[i] = new Complex(qam_symbols_payload.get(0).getReal(),0);
+////            else if(i == N)
+////                qam_symbols_data[i] = new Complex(qam_symbols_payload.get(0).getImag(),0);
+////            else if(i < N)
+////                qam_symbols_data[i] = qam_symbols_payload.get(i);
+////            else
+////                qam_symbols_data[i] = qam_symbols_payload.get(K-i).conjugate();
+////        }
+//        Complex [] ofdm_symbols = IFFT.ifft(qam_symbols_data);
+//
+//        float [] audio_data_nocp = new float[ofdm_symbols.length];
+//        float max = 0, tmp;
+//        for(int i = 0; i < ofdm_symbols.length;i++){
+//            tmp = (float)ofdm_symbols[i].getReal();
+//            audio_data_nocp[i] = tmp;
+//            if (Math.abs(tmp) > max){
+//                max = Math.abs(tmp);
+//            }
+//        }
+//        CyclicPrefix cp = new CyclicPrefix(cp_ratio);
+//        float [] float_audio_data = cp.add_cp(audio_data_nocp);
+//        //padding zeros and concatenate
+//        double time = 0.005;
+        int zeronum = 1024;
+        int data_len = preamble_data.length + zeronum + payload_data.length;
 
 
         audio_data = new short[data_len];
         short MAX_SHORT = 32767;
         //short MAX_SHORT_FORDATA=23173;
-        for(int i = 0; i < data_len;i++){
+        for(i = 0; i < data_len;i++){
             if(i < preamble_data.length)
                 audio_data[i] = (short)(preamble_data[i]*MAX_SHORT);
             else if(i < preamble_data.length+zeronum)
                 audio_data[i] = 0;
             else
-                audio_data[i] = (short)(float_audio_data[i-preamble_data.length-zeronum] *MAX_SHORT);
+                audio_data[i] = (short)(payload_data[i-preamble_data.length-zeronum] *MAX_SHORT);
         }
         int cc = 1;
+    }
+
+    private Complex [] get_complex_from_bits(int [] bits){
+        Complex [] complex_sig = new Complex[bits.length / 2];
+        for(int i = 0; i < complex_sig.length;i++){
+            complex_sig[i] = new Complex(bits[2*i], bits[2*i+1]);
+        }
+        return complex_sig;
+    }
+
+    private Complex [] select_complex_sig(Complex [] sig, int size){
+        Complex [] ssig= new Complex[size];
+        for(int i = 0; i < size;i++){
+            ssig[i] = sig[i];
+        }
+        return ssig;
+    }
+
+    private Complex [] subarray(Complex[] data, int begin, int end){
+        Complex [] res = new Complex[end-begin];
+        int j = 0;
+        for(int i = begin;i < end;i++){
+            res[j] = data[i];
+            j+=1;
+        }
+        return res;
     }
 
     private void test_cos_config(){
@@ -315,156 +434,9 @@ public class Transceiver implements Runnable{
         }
     }
 
-    private void chirp_test(){
-
-
-    }
-
-    private void chirp_config(){
-        //preamble
-        float [] x = new float[pream_sample_num];
-        for(int i = 0; i <pream_sample_num;i++){
-            x[i] = (float)i/sample_rate;
-        }
-        fmin = 12000;
-        fmax = 16000;
-        chirp ch1 = new chirp(),ch2 = new chirp();
-        float [] pre_first = ch1.get_chirp(x,fmin,(float)pream_sample_num/sample_rate,fmax,0);
-        float phase = ch1.get_phase();
-        float [] pre_last = ch2.get_chirp(x,fmax,(float)pream_sample_num/sample_rate,fmin,phase);
-        chirp ch3 = new chirp();
-        float [] test = ch3.get_chirp(x,fmax,(float)pream_sample_num/sample_rate,fmin,phase);
-        preamble_data = new float[2*pream_sample_num];
-        for(int i = 0; i < 2*pream_sample_num; i++){
-            if(i < pream_sample_num){
-                preamble_data[i] = pre_first[i];
-            }else{
-                preamble_data[i] = pre_last[i-pream_sample_num];
-            }
-        }
-        //payload
-        byte [] raw_data = {
-                0x5d,0x71,0x62,0x57,0x21,0x79,0x32,0x1f,0xe,0x22,0x57,0x15,0x34,0x50,0x6c,0x4,0x18,0x11,0x45,
-                0x13,0x35,0x7e,0x1,0x11,0x48,0x8
-        };
-        bit_data = FSK.byte_to_bit_1(raw_data);
-
-        int f0 = 3000,fmid=6000, f1=9000;
-        int sample_per_bit = 64;
-        float [] t = new float[sample_per_bit];
-        for(int i = 0; i <sample_per_bit;i++){
-            t[i] = (float)i/sample_rate;
-        }
-        payload_data = new float[sample_per_bit * bit_data.length];
-        //gen chirp0
-        float [] thalf = new float[sample_per_bit / 2];
-        for(int i = 0; i <sample_per_bit/2;i++){
-            thalf[i] = (float)i/sample_rate;
-        }
-
-        chirp ch = new chirp();
-        float [] chirp0_0 = ch.get_chirp(thalf, fmid,(float)sample_per_bit/2 / sample_rate,f0,0);
-        phase = ch.get_phase();
-        float [] chirp0_1 = ch.get_chirp(thalf, f0,(float)sample_per_bit / 2 / sample_rate,fmid,phase);
-        float [] chirp0 = Array.concat(chirp0_0,chirp0_1);
-        //gen chirp1
-        ch = new chirp();
-        float [] chirp1_0 = ch.get_chirp(thalf, fmid,(float)sample_per_bit /2/ sample_rate,f1,0);
-        phase = ch.get_phase();
-        float [] chirp1_1 = ch.get_chirp(thalf, f1,(float)sample_per_bit /2/ sample_rate,fmid,phase);
-        float [] chirp1 = Array.concat(chirp1_0,chirp1_1);
-
-        for(int i = 0; i < bit_data.length;i++){
-            int bit = bit_data[i];
-            if(bit == 0){
-                Array.replace(payload_data, chirp0,sample_per_bit*i, sample_per_bit);
-            }
-            else{
-                Array.replace(payload_data, chirp1,sample_per_bit*i, sample_per_bit);
-            }
-
-        }
-
-        int zeronum = 256;
-        int data_len = preamble_data.length + zeronum + payload_data.length;
-        audio_data = new short[data_len];
-        short MAX_SHORT = 32767;
-        //short MAX_SHORT_FORDATA=23173;
-        for(int i = 0; i < data_len;i++){
-            if(i < preamble_data.length)
-                audio_data[i] = (short)(preamble_data[i]*MAX_SHORT);
-            else if(i < preamble_data.length+zeronum)
-                audio_data[i] = 0;
-            else
-                audio_data[i] = (short)(payload_data[i-preamble_data.length-zeronum] *MAX_SHORT);
-        }
-
-    }
-
-    private void lora_chirp_config(){
-        int spreadingFactor = 8;
-        int samplesInChirp = (int)Math.pow(2,spreadingFactor);
-        int BW = sample_rate / 2;
-        float fmin = -BW/2, fmax = BW/2;
-        float df = BW/(samplesInChirp-1);
-        chirp ch1 = new chirp();
-        /**using four upchirp as the preamble*/
-        int upchirpNum = 4;
-        float [] x = new float[samplesInChirp];
-        for(int i = 0; i < samplesInChirp;i++){
-            x[i] = (float)i/sample_rate;
-        }
-        float [] preChirp = ch1.get_chirp(x, fmin, df, 0);
-        for(int i = 0; i < upchirpNum;i++){
-            preamble_data[i] = preChirp[i % x.length];
-        }
-
-        /**Payload*/
-        /**If the spreading factor is the multiple of 4, using this as the payload*/
-        byte [] raw_data_1 = {
-                0x5d,0x71,0x62,0x57,0x21,0x79,0x32,0x1f,0xe,0x22,0x57,0x15,0x34,0x50,0x6c,0x4,0x18,0x11,0x45,
-                0x13,0x35,0x7e,0x1,0x11,0x48,0x8
-        };
-        /**If the spreading factor is 6, using this as the payload*/
-        byte [] raw_data_2 = {
-                0x3d,0x21,0x12,0x17,0x21,0x9,0x32,0x1f,0xe,0x22,0x37,0x15,0x34,0x20,0x1c,0x4,0x18,0x11,0x25,
-                0x13,0x35,0x3e,0x1,0x11,0x28,0x8
-        };
-        byte [] raw_data = raw_data_2;
-        int payloadNum = 0;
-        for(byte b: raw_data){
-            chirp tmpchirp = new chirp();
-            if(b == 0){
-                for(float sample: tmpchirp.get_chirp(x, fmin, df,0)){
-                    payload_data[payloadNum++] = sample;
-                }
-            }else{
-                for(float sample: tmpchirp.get_chirp(x, 0, samplesInChirp-b, fmin, df,0)){
-                    payload_data[payloadNum++] = sample;
-                }
-                for(float sample: tmpchirp.get_chirp(x, samplesInChirp-b, samplesInChirp, fmin, df, 0)){
-                    payload_data[payloadNum++] = sample;
-                }
-            }
-        }
-        /**Concatnate preamble, zero, and payload*/
-        int zeronum = 64;
-        short MAX_SHORT = 32767;
-        int data_len = preamble_data.length+zeronum+payload_data.length;
-        audio_data = new short[data_len];
-        for(int i = 0; i < data_len;i++){
-            if(i < preamble_data.length)
-                audio_data[i] = (short)(preamble_data[i]*MAX_SHORT);
-            else if(i < preamble_data.length+zeronum)
-                audio_data[i] = 0;
-            else
-                audio_data[i] = (short)(payload_data[i-preamble_data.length-zeronum] *MAX_SHORT);
-        }
-    }
-
     private void lora_chirp_config_gnuradio(){
         Byte [] raw_data = {
-            72, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 58, 32, 48
+                72, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 58, 32, 48
         };
 
         Byte [] nybbles = new Byte[raw_data.length*2];
@@ -505,14 +477,77 @@ public class Transceiver implements Runnable{
 
         LoRaMod lrm = new LoRaMod(data2);
         ArrayList<Float> data3 = lrm.getOutput();
+        Float [] data3_array = (Float [])data3.toArray(new Float[data3.size()]);
+        write_to_file("tx_samples_lora_float",data3_array);
 
         audio_data = new short[data3.size()];
         for(int i = 0; i < audio_data.length;i++){
             audio_data[i] = (short)(data3.get(i) * 32767);
         }
 
-        write_to_file("tx_samples_lora",audio_data);
+        write_to_file("tx_samples_lora_short",audio_data);
     }
+
+
+    private short[] chirp_config(int ampl){
+        //preamble
+        int fft_size = 64;
+        int cp_len = 16;
+        float df = (float) sample_rate / fft_size;
+        int comb_per_symbol = 4;
+        int [] freq_idx_3 = {13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28};
+        int [] freq_idx_2 = {21,22,23,24,25,26,27,28};
+        float [] t = new float[fft_size];
+        float [][] upchirp = new float[comb_per_symbol][fft_size];
+        float [] downchirp = new float[fft_size];
+        float chirp_time = (float)(1.0 * fft_size / sample_rate);
+        for(int i = 0; i < fft_size;i++){
+            t[i] = (float)(i * 1.0 / sample_rate);
+        }
+        for(int i = 0; i < comb_per_symbol; i++){
+            upchirp[i] = chirp.get_chirp(t,freq_idx_2[2*i]*df,chirp_time,freq_idx_2[2*i+1]*df,0);
+        }
+
+        /**data assembling**/
+        int preamble_chirp_length = 128;
+        int preamble_upchirp_num = 4;
+        int preamble_length = preamble_chirp_length*preamble_upchirp_num;
+        int zero_num = 64;
+        int data_length = 2048*(fft_size+cp_len);
+        float [] tp = new float[preamble_chirp_length];
+        for(int i = 0; i < preamble_chirp_length;i++){
+            tp[i] = (float)(i * 1.0 / sample_rate);
+        }
+        int ct = 0;
+        short [] audio_data = new short[preamble_length + zero_num + data_length];
+        int fmin = 12000, fmax = 16000;
+        float [] preamble_chirp = chirp.get_chirp(tp,fmin,(float) (preamble_length*1.0)/sample_rate, fmax,0);
+        for(int i = 0; i < preamble_upchirp_num;i++){
+            for(float f:preamble_chirp){
+                audio_data[ct] = (short)(f * ampl);
+                ct += 1;
+            }
+        }
+        for(int i = 0; i < zero_num;i++,ct++){
+            audio_data[ct] = 0;
+        }
+
+        int [] bits = read_from("bits_2.txt",2048);
+
+        for(int i = 0; i < bits.length; i++){
+            int chirp_idx = bits[i];
+            for(int j = 0; j < cp_len; j++, ct++){
+                audio_data[ct] = (short)(ampl*upchirp[chirp_idx][j+fft_size-cp_len]);
+            }
+            for(int j = 0; j < fft_size;j++,ct++){
+                audio_data[ct] = (short)(ampl*upchirp[chirp_idx][j]);
+            }
+        }
+        return audio_data;
+
+    }
+
+
 
     private void write_to_file(String name, short [] array){
         try{
@@ -520,6 +555,23 @@ public class Transceiver implements Runnable{
             for(short data : array) {
                 try {
                     bw.write(Short.toString(data) +  '\n');
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            bw.flush();
+            bw.close();
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void write_to_file(String name, Float [] array){
+        try{
+            setOutputFile(name);
+            for(float data : array) {
+                try {
+                    bw.write(Float.toString(data) +  '\n');
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -582,19 +634,90 @@ public class Transceiver implements Runnable{
         }
     }
 
-    @TargetApi(23)
-    private void send(){
-        audio.play();
-        //audio.write(preamble_data,0,preamble_data.length,AudioTrack.WRITE_NON_BLOCKING);
-        while(isOn){
-            //audio.write(preamble_data,0,preamble_data.length,AudioTrack.WRITE_NON_BLOCKING);
-            audio.write(audio_data,0,audio_data.length,AudioTrack.WRITE_BLOCKING);
+    private int [] read_from(String name, int size){
+        File bitfile = new File(Environment.getExternalStorageDirectory()+"/"+name);
+        int [] bits = new int[size];
+        try{
+            FileInputStream fis= new FileInputStream(bitfile);
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fis));
+            String str;
+            int i = 0;
+            while((str = bufferedReader.readLine()) != null){
+                bits[i] = Integer.parseInt(str);
+                i += 1;
+            }
+        }catch (Exception e){
+
         }
+        return bits;
+    }
+
+    @TargetApi(23)
+    private void load_audio_file(String name){
+        File audioFile = new File(Environment.getExternalStorageDirectory()+"/"+name);
+        int SIZE = 5300000;
+        chirp ch = new chirp();
+        int sig_num = 64;
+//        int fmin = 16538, fmax = 17916;
+
+        float [] t = new float[sig_num];
+        for(int i = 0; i < sig_num;i++){
+            t[i] = (float)(i*1.0 / sample_rate);
+        }
+
+        short [] sig = chirp_config(100);
+        int f = 16538;
+//        float [] sig = new float[sig_num];
+//        for(int i = 0; i < sig_num;i++){
+//            sig[i] = (float)Math.cos(2*Math.PI*f*t[i]);
+//        }
+
+        try{
+            FileInputStream fis= new FileInputStream(audioFile);
+            //fis.skip(182350+0x4c);
+
+            byte [] buf = new byte[SIZE];
+            short [] buf_short = new short[SIZE/2];
+            fis.read(buf);
+            ByteBuffer.wrap(buf).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(buf_short);
+            write_to_file("canon_tx_raw.txt",buf_short);
+            for(int i = 0; i < buf_short.length;i++){
+                buf_short[i] = (short) (buf_short[i] *0.9);
+            }
+            for(int i = 0; i < buf_short.length;i++){
+                buf_short[i] += sig[i%sig.length];
+            }
+
+            int slice_idx = 0;
+            int slice_size = 4096;
+            audio.play();
+             while(isOn){
+                audio.write(buf_short,slice_idx*slice_size,slice_size,AudioTrack.WRITE_BLOCKING);
+                 slice_idx += 1;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @TargetApi(23)
+    private void send(Boolean with_music){
+        if(!with_music){
+            audio.play();
+            //audio.write(preamble_data,0,preamble_data.length,AudioTrack.WRITE_NON_BLOCKING);
+            while(isOn){
+                //audio.write(preamble_data,0,preamble_data.length,AudioTrack.WRITE_NON_BLOCKING);
+                audio.write(audio_data,0,audio_data.length,AudioTrack.WRITE_BLOCKING);
+            }
+        }else{
+            load_audio_file("canon_1min.wav");
+        }
+
     }
 
     @Override
     public void run(){
-        send();
+        send(false);
     }
 
     public void setStart(){
