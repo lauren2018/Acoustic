@@ -17,10 +17,11 @@ public class Param {
     private Object value;
     private boolean isArray;
 
-    public Param(String key, DataType type, Object value) {
+    public Param(String key, DataType type, Object value, boolean array) {
         this.key = key;
         this.type = type;
         this.value = value;
+        this.isArray = array;
     }
 
     public Object getValue() {

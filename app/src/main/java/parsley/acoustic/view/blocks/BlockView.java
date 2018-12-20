@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import parsley.acoustic.R;
+import parsley.acoustic.view.basic.DataType;
 import parsley.acoustic.view.basic.Param;
 
 /**
@@ -21,43 +22,28 @@ import parsley.acoustic.view.basic.Param;
  */
 
 public class BlockView extends RelativeLayout{
-    /*variables on layout*/
-    private BlockTemplate mBlock;
-    /*variables on logic, params*/
+    /**variables on logic, params*/
+    protected String mBlockName;
     protected ArrayList<Port> mInPorts = new ArrayList<Port>();
     protected ArrayList<Port> mOutPorts = new ArrayList<Port>();
     private Map<String, TextView> mTexts= new HashMap<String, TextView>();
-    protected int mInPortsNum;
-    protected int mOutPortsNum;
     protected ArrayList<String> mParameterKeys = new ArrayList<String >();
     protected Map<String, Param> mParameters = new HashMap<String,Param>();
 
-    /*variables on logic, connection*/
+    /**Views on logic, connection*/
+    private BlockTemplate mBlock;
     private LinearLayout textGroup;
     private RelativeLayout mBlockLayout;
 
-    /**parameters of drag/touch*/
-    float dX, dY, lastAction;
+    /**connected graphs*/
+    //private ArrayList<BlockView> nextViews= new ArrayList<>();
 
-    public BlockView(Context context, Integer id){
+    public BlockView(Context context, String blockName, ArrayList<String> keys, Map<String, Param> params, DataType inType, DataType outType, int inNum, int outNum){
         super(context);
-        //_initViews();
-        //this.mBlockViewId = id;
+        blockviewInit(context, blockName, keys, params, inType, outType, inNum, outNum);
     }
 
-    public BlockView(Context context, AttributeSet attr, Integer id){
-        super(context,attr);
-        //_initViews();
-        //this.mBlockViewId = id;
-    }
-
-    public BlockView(Context context,  ArrayList<String> keys, Map<String, Param> params, Integer id){
-        super(context);
-
-//        setParams(context);
-    }
-
-    public BlockView(Context context, AttributeSet attrs,  ArrayList<String> keys, Map<String, Param> params, Integer id){
+    public BlockView(Context context, AttributeSet attrs,  ArrayList<String> keys, Map<String, Param> params){
         super(context, attrs);
     }
 
@@ -66,7 +52,14 @@ public class BlockView extends RelativeLayout{
         mBlockLayout = new RelativeLayout(context);
     }
 
-    protected void _initViews(Context context, ArrayList<String> keys, Map<String, Param> params, Integer id){
+    protected void blockviewInit(Context context, String blockName, ArrayList<String> keys, Map<String, Param> params, DataType inType, DataType outType, int inNum, int outNum){
+        mBlockName = blockName;
+        for(int i = 0; i < inNum;i++){
+            mInPorts.add(new Port(inType, R.integer.IN_PORT,this));
+        }
+        for(int i = 0; i < outNum;i++){
+            mOutPorts.add(new Port(outType, R.integer.OUT_PORT,this));
+        }
         for(int i = 0; i < keys.size();i++){
             mParameterKeys.add(keys.get(i));
             mParameters.put(keys.get(i),params.get(keys.get(i)));
@@ -77,8 +70,6 @@ public class BlockView extends RelativeLayout{
         lp.addRule(RelativeLayout.ALIGN_TOP,mBlock.getId());
         lp.setMargins(20+mBlock.getBlockRectLeft(),20,10,0);
         blockParams.setLayoutParams(lp);
-        //lp.addRule(RelativeLayout.ALIGN_TOP,blockParams.getId());
-        //this.setLayoutParams(lp);
         this.addView(mBlock);
         this.addView(blockParams);
 
@@ -100,13 +91,7 @@ public class BlockView extends RelativeLayout{
         tag.setTextAppearance(R.style.TagTextView);
         tag.setSingleLine(true);
         tag.setEllipsize(TextUtils.TruncateAt.valueOf("END"));
-//        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-//                LinearLayout.LayoutParams.WRAP_CONTENT);
-//        lp.weight = 1;
-//        tag.setLayoutParams(lp);
         tag.setWidth((int)(mBlock.getBlockWidth()*1.0/4));
-
-        //...
         return tag;
     }
 
@@ -138,7 +123,6 @@ public class BlockView extends RelativeLayout{
     private LinearLayout createBlockParamsView(){
         LinearLayout blockParams = new LinearLayout(getContext());
         LinearLayout.LayoutParams params = getWrapContentParams();
-        //params.setMargins(mBlock.getBlockRectLeft(),0,0,0);
         blockParams.setOrientation(LinearLayout.VERTICAL);
         blockParams.setLayoutParams(params);
         for(int i = 0; i < mParameterKeys.size();i++){
@@ -172,73 +156,4 @@ public class BlockView extends RelativeLayout{
     }
 
     public BlockTemplate getBlockTemplate(){ return mBlock; }
-
-//    @Override
-//    public boolean onTouchEvent(MotionEvent event){
-////        view = (BlockView) view;
-//        long mTimerBegin = System.currentTimeMillis();
-//        long mTimerEnd = System.currentTimeMillis();
-//        boolean down = false;
-//        switch (event.getActionMasked()) {
-//            case MotionEvent.ACTION_DOWN:
-//                dX = event.getX() - event.getRawX();
-//                dY = event.getY() - event.getRawY();
-//                lastAction = MotionEvent.ACTION_DOWN;
-//                if(!down) {
-//                    mTimerBegin = System.currentTimeMillis();
-//                    down = true;
-//                }
-//                break;
-//
-//            case MotionEvent.ACTION_MOVE:
-//                //delete the original cables
-////                for(int i = 0; i < ((BlockView) event).getInPorts().size();i++){
-////                    InPort tmp = ((BlockView) view).getInPorts().get(i);
-////                    if(tmp.isConnected()){
-////                        //view_disconnect_connect(tmp,tmp.getConnectedPort(),true);
-////                    }
-////                }
-////                for(int i = 0; i < ((BlockView) view).getOutPorts().size();i++){
-////                    OutPort tmpo = ((BlockView) view).getOutPorts().get(i);
-////                    for(int j = 0; j < tmpo.getConnectedPorts().size();j++){
-////                        InPort tmpi = tmpo.getConnectedPorts().get(j);
-////                        //view_disconnect_connect(tmpi,tmpo,true);
-////                    }
-////                }
-//                event.setY(event.getRawY() + dY);
-//                view.setX(event.getRawX() + dX);
-//                //add the new cables
-//                for(int i = 0; i < ((BlockView) view).getInPorts().size();i++){
-//                    InPort tmp = ((BlockView) view).getInPorts().get(i);
-//                    if(tmp.isConnected()){
-//                        //view_connect(tmp,tmp.getConnectedPort(),true);
-//                    }
-//                }
-//                for(int i = 0; i < ((BlockView) view).getOutPorts().size();i++){
-//                    OutPort tmpo = ((BlockView) view).getOutPorts().get(i);
-//                    for(int j = 0; j < tmpo.getConnectedPorts().size();j++){
-//                        InPort tmpi = tmpo.getConnectedPorts().get(j);
-//                        //view_connect(tmpi,tmpo,true);
-//                    }
-//                }
-//                lastAction = MotionEvent.ACTION_MOVE;
-//
-//                break;
-//
-//            case MotionEvent.ACTION_UP:
-//                //click event
-//                mTimerEnd = System.currentTimeMillis();
-//                if (lastAction == MotionEvent.ACTION_DOWN ){
-//                    //_initPopupWindow((BlockView)view);
-//                    return false;
-//                } else{
-//                    return true;
-//                }
-//
-//            default:
-//                return false;
-//        }
-//        return true;
-//    }
-
 }

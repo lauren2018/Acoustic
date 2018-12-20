@@ -21,24 +21,20 @@ public class Port{
     private DataType mDataType;
     private int mPortType;
     private boolean isConnected = false;
-    private ArrayList<Port> connectedPorts = new ArrayList<>();
     private ArrayList<LineGroup> lineGroups = new ArrayList<>();
+    private BlockView mBlockView;
     private int pid;
     private static int ct = 0;
 
-    public Port(PortView v, DataType d, int portType){
-        mPortView = v;
-        mDataType = d;
-        mPortType = portType;
-        pid = ct;
-        ct += 1;
-    }
+    /**connected ports*/
+    private ArrayList<Port> connectedPorts = new ArrayList<>();
 
-    public Port(DataType d, int portType){
+    public Port(DataType d, int portType, BlockView v){
         mDataType = d;
         mPortType = portType;
         pid = ct;
         ct += 1;
+        mBlockView = v;
     }
 
     public DataType getDataType(){

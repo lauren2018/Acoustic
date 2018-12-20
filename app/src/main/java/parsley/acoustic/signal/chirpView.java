@@ -11,20 +11,20 @@ import parsley.acoustic.view.basic.DataType;
 import parsley.acoustic.view.basic.Param;
 import parsley.acoustic.view.blocks.BlockView;
 
-public class chirpView extends BlockView {
+public class chirpView /*extends BlockView */{
     static float [] y;
     static float phase;
 //    private ArrayList<Port> mInPorts = new ArrayList<>();
 //    private ArrayList<Port> mOutPorts = new ArrayList<>();
 
-    public chirpView(Context context, ArrayList<String> keys, Map<String, Param> params, Integer id){
-        super(context,keys,params,id);
-        mInPorts.add(new Port(DataType.COMPLEX, R.integer.IN_PORT));
-        mInPorts.add(new Port(DataType.INTEGER,R.integer.IN_PORT));
-        mInPorts.add(new Port(DataType.INTEGER,R.integer.IN_PORT));
-        mOutPorts.add(new Port(DataType.FLOAT,R.integer.OUT_PORT));
-        _initViews(context,keys,params, id);
-;//        inports.add(new Port(context,));
+    public chirpView(Context context, ArrayList<String> keys, Map<String, Param> params){
+       // super(context,keys,params);
+//        mInPorts.add(new Port(DataType.COMPLEX, R.integer.IN_PORT));
+//        mInPorts.add(new Port(DataType.INTEGER,R.integer.IN_PORT));
+//        mInPorts.add(new Port(DataType.INTEGER,R.integer.IN_PORT));
+//        mOutPorts.add(new Port(DataType.FLOAT,R.integer.OUT_PORT));
+//        _initViews(context,keys,params, id);
+//;//        inports.add(new Port(context,));
 //        _initViews();
 //        //this.mBlockViewId = id;
 //        setParams(context);

@@ -239,58 +239,7 @@ public class Transceiver implements Runnable{
         for(i = 0; i < payload_data_length;i++){
             payload_data[i] = payload_data[i] * 1 / maxV;
         }
-//        Complex [] qam_symbols_data = new Complex[K];
-//        //payload setting (we regulate that pilot symbols cannot take the first and the (N // 2)th subchannel)
-//        j = 1;
-//        for(int i = 0; i <= payload_carriers.length;i++){
-//            if(i == 0)
-//                qam_symbols_data[0] = new Complex(qam_symbols_payload.get(0).getReal(),0);
-//            else if(i == payload_carriers.length)
-//                qam_symbols_data[subcarrier_num] = new Complex(qam_symbols_payload.get(0).getImag(),0);
-//            else {
-//                int tmpcarrier = payload_carriers[i];
-//                int tmpcarrier_sym = K - tmpcarrier;
-//                qam_symbols_data[tmpcarrier] = qam_symbols_payload.get(j);
-//                qam_symbols_data[tmpcarrier_sym] = qam_symbols_payload.get(j).conjugate();
-//                j++;
-//            }
-//        }
-//        //pilot setting
-//        j = 0;
-//        for(int i = 0; i < pilot.length;i++){
-//            int tmpcarrier = pilot_carriers[i];
-//            int tmpcarrier_sym = K - tmpcarrier;
-//            qam_symbols_data[tmpcarrier] = pilot[j];
-//            qam_symbols_data[tmpcarrier_sym] =pilot[j].conjugate();
-//            j++;
-//        }
-//
-//
-////        for(int i = 0; i < K;i++){
-////            if(i == 0)
-////                qam_symbols_data[i] = new Complex(qam_symbols_payload.get(0).getReal(),0);
-////            else if(i == N)
-////                qam_symbols_data[i] = new Complex(qam_symbols_payload.get(0).getImag(),0);
-////            else if(i < N)
-////                qam_symbols_data[i] = qam_symbols_payload.get(i);
-////            else
-////                qam_symbols_data[i] = qam_symbols_payload.get(K-i).conjugate();
-////        }
-//        Complex [] ofdm_symbols = IFFT.ifft(qam_symbols_data);
-//
-//        float [] audio_data_nocp = new float[ofdm_symbols.length];
-//        float max = 0, tmp;
-//        for(int i = 0; i < ofdm_symbols.length;i++){
-//            tmp = (float)ofdm_symbols[i].getReal();
-//            audio_data_nocp[i] = tmp;
-//            if (Math.abs(tmp) > max){
-//                max = Math.abs(tmp);
-//            }
-//        }
-//        CyclicPrefix cp = new CyclicPrefix(cp_ratio);
-//        float [] float_audio_data = cp.add_cp(audio_data_nocp);
-//        //padding zeros and concatenate
-//        double time = 0.005;
+
         int zeronum = 1024;
         int data_len = preamble_data.length + zeronum + payload_data.length;
 

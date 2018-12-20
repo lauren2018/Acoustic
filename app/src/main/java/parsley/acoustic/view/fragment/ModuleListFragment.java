@@ -62,24 +62,9 @@ public class ModuleListFragment extends Fragment {
     }
 
     private BlockView clickOnItemEvent(Fragment contentFrame, ArrayAdapter adapter, View v, int position){
-        String prefix = getContext().getPackageName();
-        String path = "signal";
-        String s = (String) adapter.getItem(position);
-        String className = prefix+'.'+path + '.' + s;
-        ArrayList<String> keys = new ArrayList<>();
-        keys.add("param1");
-        keys.add("param2");
-        HashMap<String, Param> kv = new HashMap<>();
-        Param p1 = new Param("Param1", DataType.STRING,"hello, world!");
-        Param p2 = new Param("Param2", DataType.STRING,"A test message!");
-        kv.put("param1",p1);
-        kv.put("param2",p2);
+        String blockName = (String) adapter.getItem(position);
         try{
-            Class tmp = Class.forName(className);
-            Constructor cons = tmp.getDeclaredConstructor(Context.class,ArrayList.class,Map.class,Integer.class);
-            BlockView newBlockView = (BlockView) cons.newInstance(getContext(),keys,kv,0);
-
-            //cons.newInstance(getContext(),keys,kv,0);
+            BlockView newBlockView = FunctionCallOnClick.callOnClick(getContext(),blockName);
             return newBlockView;
         }catch (Exception e){
             //do nothing
